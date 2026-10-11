@@ -1,0 +1,27 @@
+<!-- Wolko Saved Pieces Wishlist Drawer -->
+<div id="wolko-wishlist-drawer" class="fixed inset-0 z-50 overflow-hidden hidden" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Saved Pieces">
+  <div data-close-wishlist class="absolute inset-0 bg-[#24211E]/40 backdrop-blur-xs transition-opacity"></div>
+
+  <div class="absolute inset-y-0 right-0 max-w-full flex pl-10">
+    <div class="w-screen max-w-md bg-[#FAF8F5] shadow-2xl flex flex-col border-l border-[#EAE2D8]">
+      <div class="px-6 py-5 border-b border-[#EAE2D8] flex items-center justify-between bg-white">
+        <div class="flex items-center gap-2">
+          <svg class="w-4 h-4 text-[#C87D65] fill-current" viewBox="0 0 24 24">
+            <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+          </svg>
+          <h2 class="font-editorial text-xl font-medium text-[#24211E]">Saved Artisan Pieces</h2>
+          <span id="wolko-wishlist-drawer-count" class="text-xs font-mono text-[#8C827A]">(0)</span>
+        </div>
+        <button type="button" data-close-wishlist class="p-1.5 text-[#8C827A] hover:text-[#24211E] rounded-full hover:bg-[#F5EFEB]">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <div id="wolko-wishlist-items" class="flex-1 overflow-y-auto px-6 py-6 divide-y divide-[#EAE2D8]/80">
+        <!-- Populated dynamically by wolko-theme.js -->
+      </div>
+    </div>
+  </div>
+</div>

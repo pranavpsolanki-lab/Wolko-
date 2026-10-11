@@ -1,0 +1,171 @@
+<section class="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 bg-[#FAF8F5]">
+  <div class="max-w-7xl mx-auto">
+    <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 pb-6 border-b border-[#EAE2D8]">
+      <div>
+        <div class="text-xs uppercase tracking-[0.2em] text-[#8C827A] font-medium mb-2">
+          {{ section.settings.kicker }}
+        </div>
+        <h2 class="font-editorial text-3xl sm:text-4xl md:text-5xl font-normal text-[#24211E] tracking-tight">
+          {{ section.settings.heading }}
+        </h2>
+      </div>
+      <p class="text-sm text-[#6B6158] max-w-md font-light">
+        {{ section.settings.subtext }}
+      </p>
+    </div>
+
+    <!-- Asymmetric Category Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <!-- Category 1: Charms & Keychains -->
+      <div
+        data-category-jump="keychains"
+        class="lg:col-span-4 group cursor-pointer relative rounded-2xl overflow-hidden bg-white border border-[#EAE2D8] hover:shadow-lg transition-all duration-300 min-h-[320px] flex flex-col justify-end p-6 sm:p-8"
+      >
+        <div class="absolute inset-0 z-0">
+          <img
+            src="{{ 'crochet_daisy_leaf_1790529192436.jpg' | asset_url }}"
+            alt="Charms & Keychains"
+            class="w-full h-full object-cover object-center group-hover:scale-108 transition-transform duration-700 ease-out"
+            loading="lazy"
+            width="600"
+            height="500"
+          >
+          <div class="absolute inset-0 bg-gradient-to-t from-[#24211E]/85 via-[#24211E]/40 to-transparent transition-opacity group-hover:opacity-90"></div>
+        </div>
+        <div class="relative z-10 text-white">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[11px] uppercase tracking-widest text-[#E8B4B8] font-medium">11 Designs</span>
+            <div class="w-8 h-8 rounded-full bg-white/20 backdrop-blur-xs flex items-center justify-center text-white group-hover:bg-white group-hover:text-[#24211E] transition-all">
+              &#8599;
+            </div>
+          </div>
+          <h3 class="font-editorial text-2xl sm:text-3xl font-medium text-white mb-1">Charms &amp; Keychains</h3>
+          <p class="text-xs sm:text-sm text-[#FAF8F5]/80 font-light max-w-sm">
+            Miniature botanical wool blossoms &amp; amigurumi with solid brass clips
+          </p>
+        </div>
+      </div>
+
+      <!-- Category 2: Handcrafted Bags -->
+      <div
+        data-category-jump="bags"
+        class="lg:col-span-8 group cursor-pointer relative rounded-2xl overflow-hidden bg-white border border-[#EAE2D8] hover:shadow-lg transition-all duration-300 min-h-[320px] flex flex-col justify-end p-6 sm:p-8"
+      >
+        <div class="absolute inset-0 z-0">
+          <img
+            src="{{ 'slouchy_hobo_bag_1790504963203.jpg' | asset_url }}"
+            alt="Handcrafted Bags"
+            class="w-full h-full object-cover object-center group-hover:scale-108 transition-transform duration-700 ease-out"
+            loading="lazy"
+            width="900"
+            height="500"
+          >
+          <div class="absolute inset-0 bg-gradient-to-t from-[#24211E]/85 via-[#24211E]/40 to-transparent transition-opacity group-hover:opacity-90"></div>
+        </div>
+        <div class="relative z-10 text-white">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[11px] uppercase tracking-widest text-[#E8B4B8] font-medium">6 Silhouettes</span>
+            <div class="w-8 h-8 rounded-full bg-white/20 backdrop-blur-xs flex items-center justify-center text-white group-hover:bg-white group-hover:text-[#24211E] transition-all">
+              &#8599;
+            </div>
+          </div>
+          <h3 class="font-editorial text-2xl sm:text-3xl font-medium text-white mb-1">Handcrafted Bags</h3>
+          <p class="text-xs sm:text-sm text-[#FAF8F5]/80 font-light max-w-sm">
+            Chunky looped totes, bucket bags, and everyday carry
+          </p>
+        </div>
+      </div>
+
+      <!-- Category 3: Embroidered Pouches -->
+      <div
+        data-category-jump="pouches"
+        class="lg:col-span-6 group cursor-pointer relative rounded-2xl overflow-hidden bg-white border border-[#EAE2D8] hover:shadow-lg transition-all duration-300 min-h-[320px] flex flex-col justify-end p-6 sm:p-8"
+      >
+        <div class="absolute inset-0 z-0">
+          <img
+            src="{{ 'coin_purse_1790504982557.jpg' | asset_url }}"
+            alt="Embroidered Pouches"
+            class="w-full h-full object-cover object-center group-hover:scale-108 transition-transform duration-700 ease-out"
+            loading="lazy"
+            width="750"
+            height="500"
+          >
+          <div class="absolute inset-0 bg-gradient-to-t from-[#24211E]/85 via-[#24211E]/40 to-transparent transition-opacity group-hover:opacity-90"></div>
+        </div>
+        <div class="relative z-10 text-white">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[11px] uppercase tracking-widest text-[#E8B4B8] font-medium">5 Styles</span>
+            <div class="w-8 h-8 rounded-full bg-white/20 backdrop-blur-xs flex items-center justify-center text-white group-hover:bg-white group-hover:text-[#24211E] transition-all">
+              &#8599;
+            </div>
+          </div>
+          <h3 class="font-editorial text-2xl sm:text-3xl font-medium text-white mb-1">Embroidered Pouches</h3>
+          <p class="text-xs sm:text-sm text-[#FAF8F5]/80 font-light max-w-sm">
+            4mm organic wool felt with French knot floral embroidery
+          </p>
+        </div>
+      </div>
+
+      <!-- Category 4: Giftable Keepsakes -->
+      <div
+        data-category-jump="gifts"
+        class="lg:col-span-6 group cursor-pointer relative rounded-2xl overflow-hidden bg-white border border-[#EAE2D8] hover:shadow-lg transition-all duration-300 min-h-[320px] flex flex-col justify-end p-6 sm:p-8"
+      >
+        <div class="absolute inset-0 z-0">
+          <img
+            src="{{ 'gift_box_trio_1790504996112.jpg' | asset_url }}"
+            alt="Giftable Keepsakes"
+            class="w-full h-full object-cover object-center group-hover:scale-108 transition-transform duration-700 ease-out"
+            loading="lazy"
+            width="750"
+            height="500"
+          >
+          <div class="absolute inset-0 bg-gradient-to-t from-[#24211E]/85 via-[#24211E]/40 to-transparent transition-opacity group-hover:opacity-90"></div>
+        </div>
+        <div class="relative z-10 text-white">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[11px] uppercase tracking-widest text-[#E8B4B8] font-medium">4 Curations</span>
+            <div class="w-8 h-8 rounded-full bg-white/20 backdrop-blur-xs flex items-center justify-center text-white group-hover:bg-white group-hover:text-[#24211E] transition-all">
+              &#8599;
+            </div>
+          </div>
+          <h3 class="font-editorial text-2xl sm:text-3xl font-medium text-white mb-1">Giftable Keepsakes</h3>
+          <p class="text-xs sm:text-sm text-[#FAF8F5]/80 font-light max-w-sm">
+            Letterpress packaged charm trios and personalized festive sets
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Category Discovery",
+  "settings": [
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker",
+      "default": "Artisan Catalog"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Explore by Category"
+    },
+    {
+      "type": "text",
+      "id": "subtext",
+      "label": "Subtitle",
+      "default": "Every object is slowly hand-looped or needle-worked in limited studio editions."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Category Discovery"
+    }
+  ]
+}
+{% endschema %}

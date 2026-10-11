@@ -1,0 +1,62 @@
+<section id="brand-statement" class="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 bg-[#FAF8F5] border-y border-[#EAE2D8]/80">
+  <div class="max-w-4xl mx-auto text-center">
+    <div class="inline-flex items-center justify-center p-2 mb-8 text-[#C87D65]">
+      <span class="text-xl opacity-80">✦</span>
+    </div>
+
+    <blockquote class="font-editorial text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-[#24211E] font-normal leading-tight tracking-tight text-balance mb-8">
+      &ldquo;{{ section.settings.quote_main }} <br class="hidden sm:inline">
+      <span class="italic text-[#7B8A78]">{{ section.settings.quote_italic }}&rdquo;</span>
+    </blockquote>
+
+    <p class="text-base sm:text-lg text-[#574E45] max-w-2xl mx-auto font-light leading-relaxed">
+      {{ section.settings.narrative }}
+    </p>
+
+    <div class="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-6 pt-10 border-t border-[#EAE2D8]">
+      <div class="text-center">
+        <span class="block font-editorial text-2xl text-[#24211E] mb-1">Pure Wool</span>
+        <span class="text-xs text-[#8C827A] tracking-wider uppercase">Natural, Unbleached Fibers</span>
+      </div>
+      <div class="text-center">
+        <span class="block font-editorial text-2xl text-[#24211E] mb-1">Zero Machine Speed</span>
+        <span class="text-xs text-[#8C827A] tracking-wider uppercase">Finger-Knitted &amp; Embroidered</span>
+      </div>
+      <div class="text-center">
+        <span class="block font-editorial text-2xl text-[#24211E] mb-1">Seeded Paper</span>
+        <span class="text-xs text-[#8C827A] tracking-wider uppercase">Plantable Packaging</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Brand Statement",
+  "settings": [
+    {
+      "type": "text",
+      "id": "quote_main",
+      "label": "Primary Quote",
+      "default": "Small details. Slow hands."
+    },
+    {
+      "type": "text",
+      "id": "quote_italic",
+      "label": "Italic Quote Line",
+      "default": "Something made just for you."
+    },
+    {
+      "type": "textarea",
+      "id": "narrative",
+      "label": "Supporting Narrative",
+      "default": "In an era of mass-produced plastic objects, Wolko honors the quiet luxury of natural fibers, manual stitch-work, and personal intention. Every piece carries the warmth of the hands that held it first."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Brand Statement"
+    }
+  ]
+}
+{% endschema %}

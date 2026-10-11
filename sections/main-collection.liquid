@@ -1,0 +1,67 @@
+<section class="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-[#FAF8F5]">
+  <div class="max-w-7xl mx-auto">
+    <div class="pb-8 mb-10 border-b border-[#EAE2D8] flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div>
+        <div class="text-xs uppercase tracking-[0.2em] text-[#8C827A] font-medium mb-2">
+          Wolko Handcrafted Collection
+        </div>
+        <h1 class="font-editorial text-3xl sm:text-5xl text-[#24211E] font-normal">
+          {{ collection.title | default: 'All Handcrafted Pieces' }}
+        </h1>
+        {%- if collection.description != blank -%}
+          <div class="mt-3 text-sm text-[#574E45] max-w-2xl font-light">
+            {{ collection.description }}
+          </div>
+        {%- endif -%}
+      </div>
+      <div class="text-xs font-mono text-[#8C827A]">
+        {%- if collection.products_count > 0 -%}
+          {{ collection.products_count }} pieces
+        {%- else -%}
+          27 Studio Works
+        {%- endif -%}
+      </div>
+    </div>
+
+    {%- if collection.products_count > 0 -%}
+      {%- paginate collection.products by section.settings.products_per_page -%}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {%- for product in collection.products -%}
+            {% render 'product-card', product: product %}
+          {%- endfor -%}
+        </div>
+
+        {%- if paginate.pages > 1 -%}
+          <div class="mt-12 flex justify-center">
+            {{ paginate | default_pagination }}
+          </div>
+        {%- endif -%}
+      {%- endpaginate -%}
+    {%- else -%}
+      <div id="wolko-featured-collection-root"></div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Collection Grid",
+  "settings": [
+    {
+      "type": "range",
+      "id": "products_per_page",
+      "min": 6,
+      "max": 48,
+      "step": 6,
+      "default": 24,
+      "label": "Products per page"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_filtering",
+      "label": "Enable Category Filtering",
+      "default": true
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,44 @@
+{
+  "current": {
+    "brand_tagline": "Slow Crafted",
+    "brand_description": "Premium handcrafted wool products, keychains, cozy accessories, and slow-made artisan lifestyle goods crafted with warmth, patience, and care.",
+    "color_background": "#FAF8F5",
+    "color_secondary_bg": "#F5EFEB",
+    "color_text": "#24211E",
+    "color_accent": "#C87D65",
+    "color_sage": "#7B8A78",
+    "free_shipping_threshold": 1999,
+    "enable_gift_note": true,
+    "diwali_promo_code": "DIWALISPARKLE",
+    "whatsapp_primary": "918237323043",
+    "whatsapp_backup": "918591542015",
+    "studio_email": "connectwithwolko@gmail.com",
+    "social_instagram_link": "https://www.instagram.com/shop_wolko",
+    "enable_whatsapp_float": true,
+    "sections": {
+      "announcement-bar": {
+        "type": "announcement-bar",
+        "settings": {
+          "show_announcement": true,
+          "announcement_badge": "🪔 Shubh Diwali Sale Live:",
+          "announcement_text": "Flat 15%–25% OFF on Handcrafted Amigurumi & Festive Hair Accessories · Use code DIWALISPARKLE · Free Delivery Above ₹1,999",
+          "cta_text": "Explore Sale"
+        }
+      },
+      "header": {
+        "type": "header",
+        "settings": {
+          "menu": "main-menu",
+          "show_diwali_pill": true
+        }
+      },
+      "footer": {
+        "type": "footer",
+        "settings": {
+          "brand_bio": "Thoughtfully crafted wool pieces, cozy accessories, and slow-made botanical creations made with warmth, patience, and genuine care.",
+          "studio_hours": "Mon – Sat, 10 AM – 7 PM IST"
+        }
+      }
+    }
+  }
+}

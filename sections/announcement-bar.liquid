@@ -1,0 +1,64 @@
+{%- if section.settings.show_announcement -%}
+  <aside
+    id="wolko-announcement-bar"
+    aria-label="Diwali Announcement"
+    class="bg-gradient-to-r from-[#1F1916] via-[#2F1E19] to-[#1F1916] text-[#FAF8F5] text-xs py-2 px-4 transition-all border-b border-amber-900/40"
+  >
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex-1 flex items-center justify-center gap-2.5 text-center overflow-hidden">
+        <span class="text-amber-400 shrink-0 animate-pulse">🪔</span>
+        <p class="truncate tracking-wide font-normal text-[11px] sm:text-xs">
+          <span class="font-semibold text-amber-300">{{ section.settings.announcement_badge }}</span>
+          {{ section.settings.announcement_text }}
+        </p>
+        <a
+          href="#diwali-sale"
+          class="hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 text-[10px] font-semibold border border-amber-400/30 transition-colors shrink-0"
+        >
+          <span>{{ section.settings.cta_text }}</span>
+          <span>&rarr;</span>
+        </a>
+      </div>
+      <button
+        type="button"
+        onclick="document.getElementById('wolko-announcement-bar').style.display='none'"
+        class="text-[#FAF8F5]/60 hover:text-white transition-colors ml-3 p-1 shrink-0"
+        aria-label="Dismiss announcement"
+      >
+        &#10005;
+      </button>
+    </div>
+  </aside>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Announcement Bar",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_announcement",
+      "label": "Show Announcement Bar",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "announcement_badge",
+      "label": "Highlight Badge",
+      "default": "🪔 Shubh Diwali Sale Live:"
+    },
+    {
+      "type": "text",
+      "id": "announcement_text",
+      "label": "Announcement Text",
+      "default": "Flat 15%–25% OFF on Handcrafted Amigurumi & Festive Hair Accessories · Use code DIWALISPARKLE · Free Delivery Above ₹1,999"
+    },
+    {
+      "type": "text",
+      "id": "cta_text",
+      "label": "Button Label",
+      "default": "Explore Sale"
+    }
+  ]
+}
+{% endschema %}

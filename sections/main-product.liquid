@@ -1,0 +1,229 @@
+{%- assign current_variant = product.selected_or_first_available_variant -%}
+{%- assign wa_primary = settings.whatsapp_primary | default: '918237323043' -%}
+
+<section class="py-12 sm:py-20 px-4 sm:px-6 lg:px-8 bg-[#FAF8F5]">
+  <div class="max-w-7xl mx-auto">
+    <!-- Breadcrumb -->
+    <nav class="mb-8 text-xs text-[#8C827A] flex items-center gap-2" aria-label="Breadcrumb">
+      <a href="{{ routes.root_url }}" class="hover:text-[#24211E]">Home</a>
+      <span>/</span>
+      {%- if product.collections.first -%}
+        <a href="{{ product.collections.first.url }}" class="hover:text-[#24211E]">{{ product.collections.first.title }}</a>
+        <span>/</span>
+      {%- endif -%}
+      <span class="text-[#24211E] font-medium">{{ product.title }}</span>
+    </nav>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14">
+      <!-- Left: Product Media Gallery (7 cols) -->
+      <div class="lg:col-span-7 space-y-4">
+        <div class="relative aspect-square rounded-3xl overflow-hidden bg-[#F5EFEB] border border-[#EAE2D8]">
+          {%- if product.featured_image -%}
+            <img
+              id="wolko-main-product-image"
+              src="{{ product.featured_image | image_url: width: 1400 }}"
+              alt="{{ product.featured_image.alt | default: product.title | escape }}"
+              class="w-full h-full object-cover"
+              width="1200"
+              height="1200"
+            >
+          {%- else -%}
+            <img
+              id="wolko-main-product-image"
+              src="{{ 'product_chunky_tote_1790489298255.jpg' | asset_url }}"
+              alt="{{ product.title | escape }}"
+              class="w-full h-full object-cover"
+              width="1200"
+              height="1200"
+            >
+          {%- endif -%}
+        </div>
+
+        {%- if product.images.size > 1 -%}
+          <div class="grid grid-cols-4 sm:grid-cols-5 gap-3">
+            {%- for image in product.images -%}
+              <button
+                type="button"
+                onclick="document.getElementById('wolko-main-product-image').src='{{ image | image_url: width: 1400 }}'"
+                class="aspect-square rounded-xl overflow-hidden border border-[#EAE2D8] hover:border-[#24211E] bg-[#F5EFEB] transition-all"
+              >
+                <img
+                  src="{{ image | image_url: width: 300 }}"
+                  alt="{{ image.alt | default: product.title | escape }}"
+                  class="w-full h-full object-cover"
+                  loading="lazy"
+                  width="200"
+                  height="200"
+                >
+              </button>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+      </div>
+
+      <!-- Right: Product Purchase & Story Form (5 cols) -->
+      <div class="lg:col-span-5 flex flex-col justify-between">
+        <div>
+          {%- if section.settings.show_vendor -%}
+            <div class="text-xs uppercase tracking-[0.2em] text-[#8C827A] font-medium mb-2">
+              {{ product.vendor | default: 'Wolko Artisan Studio' }} &middot; {{ product.type | default: '100% Handcrafted' }}
+            </div>
+          {%- endif -%}
+
+          <h1 class="font-editorial text-3xl sm:text-5xl text-[#24211E] font-normal tracking-tight mb-4">
+            {{ product.title }}
+          </h1>
+
+          <!-- Price & Stock Badge -->
+          <div class="flex items-baseline gap-3 pb-6 mb-6 border-b border-[#EAE2D8]">
+            <span id="wolko-product-price" class="font-mono text-2xl sm:text-3xl font-semibold text-[#24211E] tabular-nums">
+              {{ current_variant.price | money }}
+            </span>
+            {%- if current_variant.compare_at_price > current_variant.price -%}
+              <span class="font-mono text-sm text-[#8C827A] line-through tabular-nums">
+                {{ current_variant.compare_at_price | money }}
+              </span>
+            {%- endif -%}
+            <span class="ml-auto text-xs font-medium px-2.5 py-1 rounded-full {% if current_variant.available %}bg-emerald-50 text-emerald-700 border border-emerald-200{% else %}bg-rose-50 text-rose-700 border border-rose-200{% endif %}">
+              {%- if current_variant.available -%}
+                {{ 'products.product.in_stock' | t }}
+              {%- else -%}
+                {{ 'products.product.sold_out' | t }}
+              {%- endif -%}
+            </span>
+          </div>
+
+          <!-- Product Description -->
+          <div class="prose prose-sm text-[#4A443E] font-light leading-relaxed mb-8">
+            {{ product.description }}
+          </div>
+
+          <!-- Native Shopify Product Form -->
+          {%- form 'product', product, id: 'wolko-shopify-product-form', class: 'space-y-6' -%}
+            <input type="hidden" name="id" id="wolko-variant-select-input" value="{{ current_variant.id }}">
+
+            {%- unless product.has_only_default_variant -%}
+              <div class="space-y-4">
+                <label for="wolko-variant-dropdown" class="block text-xs uppercase tracking-wider text-[#6B6158] font-medium">
+                  Select Artisan Variant
+                </label>
+                <select
+                  id="wolko-variant-dropdown"
+                  onchange="document.getElementById('wolko-variant-select-input').value = this.value"
+                  class="w-full px-4 py-3 rounded-xl border border-[#D9CFC4] bg-white text-sm text-[#24211E] focus:outline-none focus:border-[#24211E]"
+                >
+                  {%- for variant in product.variants -%}
+                    <option
+                      value="{{ variant.id }}"
+                      {% if variant == current_variant %}selected="selected"{% endif %}
+                      {% unless variant.available %}disabled="disabled"{% endunless %}
+                    >
+                      {{ variant.title }} &mdash; {{ variant.price | money }}{% unless variant.available %} ({{ 'products.product.sold_out' | t }}){% endunless %}
+                    </option>
+                  {%- endfor -%}
+                </select>
+              </div>
+            {%- endunless -%}
+
+            <!-- Quantity Selector -->
+            <div>
+              <label for="Quantity-{{ section.id }}" class="block text-xs uppercase tracking-wider text-[#6B6158] font-medium mb-2">
+                {{ 'products.product.quantity' | t }}
+              </label>
+              <div class="inline-flex items-center border border-[#D9CFC4] rounded-xl bg-white">
+                <button
+                  type="button"
+                  onclick="var q=document.getElementById('Quantity-{{ section.id }}'); if(q.value>1) q.value=parseInt(q.value)-1;"
+                  class="px-3.5 py-2 text-[#6B6158] hover:text-[#24211E]"
+                >&minus;</button>
+                <input
+                  type="number"
+                  name="quantity"
+                  id="Quantity-{{ section.id }}"
+                  min="1"
+                  value="1"
+                  class="w-12 text-center font-mono text-sm text-[#24211E] focus:outline-none"
+                >
+                <button
+                  type="button"
+                  onclick="var q=document.getElementById('Quantity-{{ section.id }}'); q.value=parseInt(q.value)+1;"
+                  class="px-3.5 py-2 text-[#6B6158] hover:text-[#24211E]"
+                >+</button>
+              </div>
+            </div>
+
+            <!-- Add to Bag & Dynamic Accelerated Checkout -->
+            <div class="space-y-3 pt-2">
+              <button
+                type="submit"
+                name="add"
+                {% unless current_variant.available %}disabled{% endunless %}
+                class="w-full py-4 px-6 bg-[#24211E] hover:bg-[#3A3530] disabled:bg-[#8C827A] text-[#FAF8F5] text-xs uppercase tracking-widest font-semibold rounded-full transition-all shadow-md"
+              >
+                {%- if current_variant.available -%}
+                  {{ 'products.product.add_to_cart' | t }}
+                {%- else -%}
+                  {{ 'products.product.sold_out' | t }}
+                {%- endif -%}
+              </button>
+
+              {{ form | payment_button }}
+            </div>
+          {%- endform -%}
+
+          {%- if section.settings.show_whatsapp_inquiry -%}
+            <div class="mt-4">
+              <a
+                href="https://wa.me/{{ wa_primary }}?text=Hi%20Wolko!%20I%20would%20like%20to%20order%20*{{ product.title | url_encode }}*%20({{ current_variant.price | money | strip_html | url_encode }})."
+                target="_blank"
+                rel="noopener noreferrer"
+                class="w-full py-3 px-6 rounded-full border border-[#25D366]/50 bg-[#25D366]/10 hover:bg-[#25D366] text-[#128C7E] hover:text-white text-xs font-semibold tracking-wider uppercase flex items-center justify-center gap-2 transition-all"
+              >
+                <span>Order or Customize on WhatsApp</span>
+              </a>
+            </div>
+          {%- endif -%}
+
+          {%- if section.settings.show_care_instructions -%}
+            <div class="mt-8 pt-6 border-t border-[#EAE2D8] space-y-2 text-xs text-[#6B6158]">
+              <h4 class="uppercase tracking-wider text-[#24211E] font-medium">Artisan Care &amp; Packaging</h4>
+              <p class="font-light">Spot clean gently with cool water and mild wool wash. Reshape and air dry flat in shade. Delivered in plantable seeded cotton paper.</p>
+            </div>
+          {%- endif -%}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Product Information",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_vendor",
+      "label": "Show Studio Vendor Header",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_sticky_info",
+      "label": "Enable Sticky Product Details",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_care_instructions",
+      "label": "Show Wool Care Instructions",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_whatsapp_inquiry",
+      "label": "Show WhatsApp Order Button",
+      "default": true
+    }
+  ]
+}
+{% endschema %}

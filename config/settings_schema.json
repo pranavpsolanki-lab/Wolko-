@@ -1,0 +1,129 @@
+[
+  {
+    "name": "theme_info",
+    "theme_name": "Wolko Artisan Studio",
+    "theme_version": "2.0.0",
+    "theme_author": "Wolko Handcrafted Studio",
+    "theme_documentation_url": "https://github.com/pranavpsolanki-lab/Wolko-",
+    "theme_support_url": "https://www.instagram.com/shop_wolko"
+  },
+  {
+    "name": "Brand Identity & Logos",
+    "settings": [
+      {
+        "type": "image_picker",
+        "id": "logo",
+        "label": "Studio Logo Image"
+      },
+      {
+        "type": "image_picker",
+        "id": "favicon",
+        "label": "Favicon Image"
+      },
+      {
+        "type": "text",
+        "id": "brand_tagline",
+        "label": "Brand Subtitle",
+        "default": "Slow Crafted"
+      },
+      {
+        "type": "textarea",
+        "id": "brand_description",
+        "label": "Default Meta Description",
+        "default": "Premium handcrafted wool products, keychains, cozy accessories, and slow-made artisan lifestyle goods crafted with warmth, patience, and care."
+      }
+    ]
+  },
+  {
+    "name": "Colors & Artisan Palette",
+    "settings": [
+      {
+        "type": "color",
+        "id": "color_background",
+        "label": "Primary Background (Warm Ivory)",
+        "default": "#FAF8F5"
+      },
+      {
+        "type": "color",
+        "id": "color_secondary_bg",
+        "label": "Secondary Background (Soft Cream)",
+        "default": "#F5EFEB"
+      },
+      {
+        "type": "color",
+        "id": "color_text",
+        "label": "Primary Text (Deep Charcoal)",
+        "default": "#24211E"
+      },
+      {
+        "type": "color",
+        "id": "color_accent",
+        "label": "Terracotta Accent",
+        "default": "#C87D65"
+      },
+      {
+        "type": "color",
+        "id": "color_sage",
+        "label": "Botanical Sage Accent",
+        "default": "#7B8A78"
+      }
+    ]
+  },
+  {
+    "name": "Cart & Free Shipping",
+    "settings": [
+      {
+        "type": "number",
+        "id": "free_shipping_threshold",
+        "label": "Free Shipping Threshold (in ₹)",
+        "default": 1999
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_gift_note",
+        "label": "Enable Complimentary Seed-Paper Gift Note",
+        "default": true
+      },
+      {
+        "type": "text",
+        "id": "diwali_promo_code",
+        "label": "Active Promo Code",
+        "default": "DIWALISPARKLE"
+      }
+    ]
+  },
+  {
+    "name": "WhatsApp & Studio Contact",
+    "settings": [
+      {
+        "type": "text",
+        "id": "whatsapp_primary",
+        "label": "Primary WhatsApp Number (with country code)",
+        "default": "918237323043"
+      },
+      {
+        "type": "text",
+        "id": "whatsapp_backup",
+        "label": "Backup Dispatch WhatsApp Number",
+        "default": "918591542015"
+      },
+      {
+        "type": "text",
+        "id": "studio_email",
+        "label": "Studio Contact Email",
+        "default": "connectwithwolko@gmail.com"
+      },
+      {
+        "type": "url",
+        "id": "social_instagram_link",
+        "label": "Instagram URL"
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_whatsapp_float",
+        "label": "Show Floating WhatsApp Order Button",
+        "default": true
+      }
+    ]
+  }
+]

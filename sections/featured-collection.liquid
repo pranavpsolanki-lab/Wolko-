@@ -1,0 +1,121 @@
+{%- assign target_collection = collections[section.settings.collection] -%}
+
+<section id="collection" class="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 bg-[#FAF8F5]">
+  <div class="max-w-7xl mx-auto">
+    <!-- Section Header -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 pb-6 border-b border-[#EAE2D8]">
+      <div>
+        <div class="text-xs uppercase tracking-[0.2em] text-[#8C827A] font-medium mb-2">
+          {{ section.settings.kicker }}
+        </div>
+        <h2 class="font-editorial text-3xl sm:text-4xl md:text-5xl font-normal text-[#24211E] tracking-tight">
+          {{ section.settings.heading }}
+        </h2>
+      </div>
+
+      <!-- Interactive Filter Controls -->
+      <div class="flex items-center gap-1.5 overflow-x-auto pb-2 md:pb-0 scrollbar-none">
+        <button type="button" data-collection-tab="all" class="wolko-collection-tab px-3.5 py-1.5 text-xs font-medium rounded-full transition-all whitespace-nowrap shrink-0 bg-[#24211E] text-white shadow-xs">
+          All Works
+        </button>
+        <button type="button" data-collection-tab="keychains" class="wolko-collection-tab px-3.5 py-1.5 text-xs font-medium rounded-full transition-all whitespace-nowrap shrink-0 text-[#6B6158] hover:text-[#24211E] hover:bg-[#EAE2D8]/50">
+          Charms &amp; Keychains
+        </button>
+        <button type="button" data-collection-tab="accessories" class="wolko-collection-tab px-3.5 py-1.5 text-xs font-medium rounded-full transition-all whitespace-nowrap shrink-0 text-[#6B6158] hover:text-[#24211E] hover:bg-[#EAE2D8]/50">
+          Hair &amp; Accessories
+        </button>
+        <button type="button" data-collection-tab="bags" class="wolko-collection-tab px-3.5 py-1.5 text-xs font-medium rounded-full transition-all whitespace-nowrap shrink-0 text-[#6B6158] hover:text-[#24211E] hover:bg-[#EAE2D8]/50">
+          Bags &amp; Totes
+        </button>
+        <button type="button" data-collection-tab="pouches" class="wolko-collection-tab px-3.5 py-1.5 text-xs font-medium rounded-full transition-all whitespace-nowrap shrink-0 text-[#6B6158] hover:text-[#24211E] hover:bg-[#EAE2D8]/50">
+          Pouches
+        </button>
+        <button type="button" data-collection-tab="gifts" class="wolko-collection-tab px-3.5 py-1.5 text-xs font-medium rounded-full transition-all whitespace-nowrap shrink-0 text-[#6B6158] hover:text-[#24211E] hover:bg-[#EAE2D8]/50">
+          Gift Sets
+        </button>
+      </div>
+    </div>
+
+    <!-- Artisan Quick Search & Command Palette Bar -->
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-12 p-3 sm:px-5 sm:py-3 rounded-2xl bg-[#F5EFEB]/90 border border-[#EAE2D8]">
+      <div class="flex items-center gap-3 w-full sm:w-auto">
+        <span class="text-xs uppercase tracking-widest text-[#8C827A] font-medium hidden md:inline">
+          Curated Studio Pieces
+        </span>
+        <button
+          type="button"
+          data-open-search
+          class="flex-1 sm:flex-initial flex items-center gap-3 px-4 py-2 bg-white rounded-full border border-[#D9CFC4] text-xs text-[#6B6158] hover:text-[#24211E] hover:border-[#24211E] transition-all shadow-xs"
+        >
+          <span>🔍</span>
+          <span class="font-light">Search bags, charms, pouches...</span>
+          <kbd class="hidden sm:inline-block px-1.5 py-0.5 rounded bg-[#FAF8F5] border border-[#D9CFC4] text-[10px] font-mono font-semibold text-[#8C827A]">
+            ⌘K
+          </kbd>
+        </button>
+      </div>
+
+      <div class="flex items-center gap-4 text-xs text-[#8C827A]">
+        <span class="inline-flex items-center gap-1.5">
+          <span class="text-[#C87D65]">✦</span>
+          <span id="wolko-collection-count" class="font-medium text-[#24211E]">27 pieces</span> available
+        </span>
+        <span class="hidden sm:inline text-[#D9CFC4]">|</span>
+        <span class="hidden sm:inline">100% Handcrafted</span>
+      </div>
+    </div>
+
+    <!-- If merchant selected a Shopify Collection with products, render them natively -->
+    {%- if target_collection != blank and target_collection.products_count > 0 -%}
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {%- for product in target_collection.products limit: section.settings.products_to_show -%}
+          {% render 'product-card', product: product %}
+        {%- endfor -%}
+      </div>
+    {%- else -%}
+      <!-- Editorial Asymmetric Layout & Complete Wolko Catalog -->
+      <div id="wolko-featured-collection-root">
+        <!-- Rendered by wolko-theme.js with asymmetric Hero Cloud Tote + paired stack + 3-col grid -->
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Featured Collection",
+  "settings": [
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Optional Shopify Collection (Leave blank to show Wolko Asymmetric Studio Collection)"
+    },
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker",
+      "default": "Curated Wool Objects"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Pieces Worth Keeping"
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "min": 3,
+      "max": 30,
+      "step": 1,
+      "default": 17,
+      "label": "Maximum Products to Show"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Featured Collection"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,25 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-product",
+      "settings": {
+        "show_vendor": true,
+        "enable_sticky_info": true,
+        "show_care_instructions": true,
+        "show_whatsapp_inquiry": true
+      }
+    },
+    "trust_proof": {
+      "type": "trust-proof",
+      "settings": {
+        "kicker": "Pledge & Transparency",
+        "heading": "Made with Care. Chosen with Intention.",
+        "subtext": "Every order is treated like a personal gift from our studio to your doorstep."
+      }
+    }
+  },
+  "order": [
+    "main",
+    "trust_proof"
+  ]
+}

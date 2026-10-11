@@ -1,0 +1,153 @@
+<section class="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-[#FAF8F5]">
+  <div class="max-w-4xl mx-auto">
+    <div class="pb-6 mb-8 border-b border-[#EAE2D8] flex items-center justify-between">
+      <h1 class="font-editorial text-3xl sm:text-5xl text-[#24211E] font-normal">
+        {{ 'templates.cart.cart' | t }}
+      </h1>
+      <a href="{{ routes.root_url }}#collection" class="text-xs uppercase tracking-wider text-[#6B6158] hover:text-[#24211E]">
+        &larr; {{ 'templates.cart.continue_shopping' | t }}
+      </a>
+    </div>
+
+    {%- if cart.item_count > 0 -%}
+      <form action="{{ routes.cart_url }}" method="post" novalidate class="space-y-8">
+        <div class="bg-white rounded-2xl border border-[#EAE2D8] divide-y divide-[#EAE2D8] overflow-hidden">
+          {%- for item in cart.items -%}
+            <div class="p-6 flex flex-col sm:flex-row items-start sm:items-center gap-6">
+              <a href="{{ item.url }}" class="w-24 h-24 rounded-xl overflow-hidden bg-[#F5EFEB] border border-[#EAE2D8] shrink-0">
+                {%- if item.image -%}
+                  <img
+                    src="{{ item.image | image_url: width: 300 }}"
+                    alt="{{ item.image.alt | default: item.title | escape }}"
+                    class="w-full h-full object-cover"
+                    width="96"
+                    height="96"
+                  >
+                {%- else -%}
+                  <img
+                    src="{{ 'product_chunky_tote_1790489298255.jpg' | asset_url }}"
+                    alt="{{ item.title | escape }}"
+                    class="w-full h-full object-cover"
+                    width="96"
+                    height="96"
+                  >
+                {%- endif -%}
+              </a>
+
+              <div class="flex-1">
+                <h3 class="font-editorial text-xl text-[#24211E] font-medium">
+                  <a href="{{ item.url }}" class="hover:text-[#C87D65]">{{ item.product.title }}</a>
+                </h3>
+                {%- unless item.product.has_only_default_variant -%}
+                  <p class="text-xs text-[#8C827A] mt-0.5">{{ item.variant.title }}</p>
+                {%- endunless -%}
+                <p class="font-mono text-sm text-[#24211E] mt-2">{{ item.final_price | money }}</p>
+              </div>
+
+              <div class="flex items-center gap-4">
+                <div class="flex items-center border border-[#D9CFC4] rounded-lg bg-[#FAF8F5]">
+                  <a
+                    href="{{ routes.cart_change_url }}?line={{ forloop.index }}&quantity={{ item.quantity | minus: 1 }}"
+                    class="px-3 py-1.5 text-sm text-[#6B6158] hover:text-[#24211E]"
+                    aria-label="Decrease quantity"
+                  >&minus;</a>
+                  <input
+                    type="number"
+                    name="updates[]"
+                    value="{{ item.quantity }}"
+                    min="0"
+                    class="w-12 text-center bg-transparent font-mono text-xs text-[#24211E] focus:outline-none"
+                  >
+                  <a
+                    href="{{ routes.cart_change_url }}?line={{ forloop.index }}&quantity={{ item.quantity | plus: 1 }}"
+                    class="px-3 py-1.5 text-sm text-[#6B6158] hover:text-[#24211E]"
+                    aria-label="Increase quantity"
+                  >+</a>
+                </div>
+
+                <span class="font-mono text-sm font-semibold text-[#24211E] w-24 text-right tabular-nums">
+                  {{ item.final_line_price | money }}
+                </span>
+
+                <a
+                  href="{{ routes.cart_change_url }}?line={{ forloop.index }}&quantity=0"
+                  class="text-xs text-[#A89E96] hover:text-[#C87D65] p-1"
+                  aria-label="Remove item"
+                >&#10005;</a>
+              </div>
+            </div>
+          {%- endfor -%}
+        </div>
+
+        {%- if section.settings.show_gift_note -%}
+          <div class="bg-white p-6 rounded-2xl border border-[#EAE2D8]">
+            <label for="CartNote" class="block text-xs uppercase tracking-wider text-[#24211E] font-medium mb-2">
+              Complimentary Handwritten Seed-Paper Gift Note
+            </label>
+            <textarea
+              name="note"
+              id="CartNote"
+              rows="3"
+              placeholder="Write your personal message here. We will scribe it with ink on plantable seed paper..."
+              class="w-full p-3 rounded-xl border border-[#D9CFC4] bg-[#FAF8F5] text-sm text-[#24211E] focus:outline-none focus:border-[#24211E]"
+            >{{ cart.note }}</textarea>
+          </div>
+        {%- endif -%}
+
+        <div class="bg-white p-6 sm:p-8 rounded-2xl border border-[#EAE2D8] flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div>
+            <div class="text-xs text-[#8C827A] mb-1">Taxes &amp; Artisan Seed-Paper Packaging Included</div>
+            <div class="flex items-baseline gap-3">
+              <span class="text-sm font-medium text-[#24211E]">{{ 'templates.cart.subtotal' | t }}:</span>
+              <span class="font-mono text-2xl font-semibold text-[#24211E] tabular-nums">{{ cart.total_price | money }}</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3 w-full sm:w-auto">
+            <button
+              type="submit"
+              name="update"
+              class="px-6 py-3.5 rounded-full border border-[#D9CFC4] text-xs uppercase tracking-wider font-medium text-[#24211E] hover:bg-[#F5EFEB] transition-colors"
+            >
+              Update Bag
+            </button>
+            <button
+              type="submit"
+              name="checkout"
+              class="flex-1 sm:flex-initial px-8 py-3.5 rounded-full bg-[#24211E] hover:bg-[#3A3530] text-[#FAF8F5] text-xs uppercase tracking-widest font-semibold transition-all shadow-md"
+            >
+              {{ 'templates.cart.checkout' | t }} &rarr;
+            </button>
+          </div>
+        </div>
+      </form>
+    {%- else -%}
+      <div class="bg-white rounded-3xl border border-[#EAE2D8] p-12 text-center">
+        <h2 class="font-editorial text-3xl text-[#24211E] mb-3">{{ 'templates.cart.empty' | t }}</h2>
+        <p class="text-sm text-[#8C827A] max-w-md mx-auto font-light mb-8">
+          Every Wolko piece is handmade in small batches. Explore our collection to discover heirloom wool favorites.
+        </p>
+        <a
+          href="{{ routes.root_url }}#collection"
+          class="inline-block px-8 py-3.5 bg-[#24211E] text-white text-xs uppercase tracking-widest font-semibold rounded-full hover:bg-[#3A3530] transition-colors"
+        >
+          Explore Collection
+        </a>
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Cart Page",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_gift_note",
+      "label": "Enable Gift Note Input",
+      "default": true
+    }
+  ]
+}
+{% endschema %}

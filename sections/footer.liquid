@@ -1,0 +1,169 @@
+{%- assign wa_primary = settings.whatsapp_primary | default: '918237323043' -%}
+{%- assign wa_backup = settings.whatsapp_backup | default: '918591542015' -%}
+{%- assign studio_email = settings.studio_email | default: 'connectwithwolko@gmail.com' -%}
+{%- assign ig_url = settings.social_instagram_link | default: 'https://www.instagram.com/shop_wolko' -%}
+
+<footer id="contact" class="bg-[#1C1A18] text-[#FAF8F5] pt-16 sm:pt-20 pb-12 border-t border-[#2E2A27]">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 pb-16 border-b border-[#2E2A27]">
+      <!-- Brand Column (4 cols) -->
+      <div class="lg:col-span-4">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 rounded-full overflow-hidden border border-[#3E3834] bg-[#2E2A27]">
+            <img
+              src="{{ 'wolko_logo_1790489253517.jpg' | asset_url }}"
+              alt="Wolko Handcrafted Studio"
+              class="w-full h-full object-cover"
+              width="40"
+              height="40"
+            >
+          </div>
+          <div>
+            <span class="font-editorial text-2xl font-semibold tracking-wider text-white uppercase block leading-none">
+              {{ shop.name | default: 'Wolko' }}
+            </span>
+            <span class="text-[10px] tracking-[0.25em] text-[#8C827A] uppercase font-light">
+              Handcrafted Lifestyle
+            </span>
+          </div>
+        </div>
+
+        <p class="text-xs sm:text-sm text-[#A89E96] font-light leading-relaxed max-w-sm mb-6">
+          {{ section.settings.brand_bio }}
+        </p>
+
+        <div class="flex items-center gap-3">
+          <a
+            href="{{ ig_url }}"
+            target="_blank"
+            rel="noreferrer"
+            class="w-9 h-9 rounded-full border border-[#3A3530] bg-[#24211E] flex items-center justify-center text-[#E8B4B8] hover:text-white hover:border-[#E8B4B8] hover:bg-[#E8B4B8]/20 transition-all shadow-xs"
+            title="Follow @shop_wolko on Instagram"
+            aria-label="Instagram @shop_wolko"
+          >
+            IG
+          </a>
+          <a
+            href="https://wa.me/{{ wa_primary }}?text=Hi%20Wolko!%20I%20have%20an%20inquiry%20about%20your%20handcrafted%20crochet%20collection."
+            target="_blank"
+            rel="noreferrer"
+            class="w-9 h-9 rounded-full border border-[#25D366]/40 bg-[#25D366]/15 flex items-center justify-center text-[#25D366] hover:text-white hover:bg-[#25D366] transition-all shadow-xs"
+            title="Chat with Wolko on WhatsApp (+{{ wa_primary }})"
+            aria-label="WhatsApp"
+          >
+            WA
+          </a>
+        </div>
+      </div>
+
+      <!-- Shop Column (2 cols) -->
+      <div class="lg:col-span-2">
+        <h4 class="text-xs uppercase tracking-widest text-white font-medium mb-4">Catalog</h4>
+        <ul class="space-y-2.5 text-xs text-[#A89E96]">
+          <li><a href="{{ routes.root_url }}#collection" data-category-jump="all" class="hover:text-white transition-colors">All Wool Pieces</a></li>
+          <li><a href="{{ routes.root_url }}#collection" data-category-jump="bags" class="hover:text-white transition-colors">Chunky Knit Totes</a></li>
+          <li><a href="{{ routes.root_url }}#collection" data-category-jump="keychains" class="hover:text-white transition-colors">Botanical Charms</a></li>
+          <li><a href="{{ routes.root_url }}#collection" data-category-jump="pouches" class="hover:text-white transition-colors">Embroidered Pouches</a></li>
+          <li><a href="{{ routes.root_url }}#collection" data-category-jump="gifts" class="hover:text-white transition-colors">Gift Sets &amp; Trios</a></li>
+        </ul>
+      </div>
+
+      <!-- Atelier Column (2 cols) -->
+      <div class="lg:col-span-2">
+        <h4 class="text-xs uppercase tracking-widest text-white font-medium mb-4">Atelier</h4>
+        <ul class="space-y-2.5 text-xs text-[#A89E96]">
+          <li><a href="{{ routes.root_url }}#about" class="hover:text-white transition-colors">Our Philosophy</a></li>
+          <li><a href="{{ routes.root_url }}#process" class="hover:text-white transition-colors">The Craft Steps</a></li>
+          <li><a href="{{ routes.root_url }}#about" class="hover:text-white transition-colors">Artisan Network</a></li>
+          <li><a href="{{ routes.root_url }}#brand-statement" class="hover:text-white transition-colors">Slow Living</a></li>
+          <li><a href="{{ routes.root_url }}#contact" class="hover:text-white transition-colors">Custom Compositions</a></li>
+        </ul>
+      </div>
+
+      <!-- Customer Care Column (2 cols) -->
+      <div class="lg:col-span-2">
+        <h4 class="text-xs uppercase tracking-widest text-white font-medium mb-4">Customer Care</h4>
+        <ul class="space-y-2.5 text-xs text-[#A89E96]">
+          <li><a href="{{ routes.cart_url }}" class="hover:text-white transition-colors">Shopping Bag</a></li>
+          <li><a href="{{ routes.search_url }}" class="hover:text-white transition-colors">Search Catalog</a></li>
+          <li><a href="https://wa.me/{{ wa_primary }}?text=Hi%20Wolko!%20I%20would%20like%20to%20track%20my%20order." target="_blank" rel="noreferrer" class="hover:text-white transition-colors">Track Order</a></li>
+          <li><a href="{{ routes.root_url }}#craft-story" class="hover:text-white transition-colors">Wool Care Guide</a></li>
+          <li><a href="mailto:{{ studio_email }}" class="hover:text-white transition-colors">Returns &amp; Exchanges</a></li>
+        </ul>
+      </div>
+
+      <!-- Direct Studio Contact (2 cols) -->
+      <div class="lg:col-span-2">
+        <h4 class="text-xs uppercase tracking-widest text-white font-medium mb-4">Direct Inquiries</h4>
+        <div class="space-y-3 text-xs text-[#A89E96]">
+          <div>
+            <span class="text-[10px] text-[#7B8A78] uppercase block">Email Us</span>
+            <a href="mailto:{{ studio_email }}" class="hover:text-white transition-colors break-words font-light">
+              {{ studio_email }}
+            </a>
+          </div>
+          <div>
+            <span class="text-[10px] text-[#7B8A78] uppercase block">WhatsApp Orders &amp; Support</span>
+            <div class="flex flex-col gap-1 mt-0.5">
+              <a
+                href="https://wa.me/{{ wa_primary }}?text=Hi%20Wolko!%20I%20have%20an%20inquiry%20about%20your%20handcrafted%20crochet%20collection."
+                target="_blank"
+                rel="noreferrer"
+                class="hover:text-[#25D366] transition-colors font-mono tabular-nums font-medium flex items-center gap-1.5"
+              >
+                <span class="w-1.5 h-1.5 rounded-full bg-[#25D366]"></span>
+                <span>+{{ wa_primary }}</span>
+                <span class="text-[9px] text-[#A89E96] font-sans font-light">(Primary)</span>
+              </a>
+              <a
+                href="https://wa.me/{{ wa_backup }}?text=Hi%20Wolko!%20Connecting%20regarding%20orders%20and%20support."
+                target="_blank"
+                rel="noreferrer"
+                class="hover:text-[#25D366] transition-colors font-mono tabular-nums font-medium flex items-center gap-1.5"
+              >
+                <span class="w-1.5 h-1.5 rounded-full bg-[#8C827A]"></span>
+                <span>+{{ wa_backup }}</span>
+                <span class="text-[9px] text-[#A89E96] font-sans font-light">(Dispatch)</span>
+              </a>
+            </div>
+          </div>
+          <div>
+            <span class="text-[10px] text-[#7B8A78] uppercase block">Hours</span>
+            <span class="font-light">{{ section.settings.studio_hours }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Bar -->
+    <div class="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#7B736B]">
+      <div>
+        <span>&copy; {{ 'now' | date: '%Y' }} {{ shop.name | default: 'Wolko Studio' }}. All rights reserved.</span>
+      </div>
+      <div class="flex items-center gap-1 text-[11px]">
+        <span>Crafted with patience &amp; natural fibers in India</span>
+        <span class="text-[#E8B4B8] ml-1">&hearts;</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+{% schema %}
+{
+  "name": "Editorial Footer",
+  "settings": [
+    {
+      "type": "textarea",
+      "id": "brand_bio",
+      "label": "Brand Bio",
+      "default": "Thoughtfully crafted wool pieces, cozy accessories, and slow-made botanical creations made with warmth, patience, and genuine care."
+    },
+    {
+      "type": "text",
+      "id": "studio_hours",
+      "label": "Studio Hours",
+      "default": "Mon – Sat, 10 AM – 7 PM IST"
+    }
+  ]
+}
+{% endschema %}

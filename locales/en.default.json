@@ -1,0 +1,53 @@
+{
+  "general": {
+    "search": {
+      "search": "Search collection",
+      "placeholder": "Search bags, charms, pouches...",
+      "no_results": "No handcrafted pieces matched your search."
+    },
+    "accessibility": {
+      "skip_to_text": "Skip to content",
+      "close": "Close"
+    }
+  },
+  "accessibility": {
+    "skip_to_text": "Skip to content",
+    "close": "Close",
+    "refresh_page": "Choosing a selection results in a full page refresh."
+  },
+  "products": {
+    "product": {
+      "add_to_cart": "Add to Bag",
+      "buy_now": "Buy Now",
+      "sold_out": "Sold Out",
+      "unavailable": "Unavailable",
+      "quantity": "Quantity",
+      "in_stock": "In Stock",
+      "view_details": "View Specifications",
+      "care_instructions": "Care Instructions"
+    }
+  },
+  "templates": {
+    "cart": {
+      "cart": "Your Shopping Bag",
+      "empty": "Your bag is empty",
+      "subtotal": "Subtotal",
+      "checkout": "Proceed to Checkout",
+      "continue_shopping": "Continue Exploring"
+    },
+    "404": {
+      "title": "Page not found",
+      "subtext": "The artisan piece or page you are looking for may have moved."
+    }
+  },
+  "sections": {
+    "header": {
+      "announcement": "Announcement",
+      "menu": "Menu",
+      "cart_count": {
+        "one": "{{ count }} item",
+        "other": "{{ count }} items"
+      }
+    }
+  }
+}

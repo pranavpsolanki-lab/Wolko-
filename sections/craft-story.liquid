@@ -1,0 +1,102 @@
+<section id="craft-story" class="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 bg-[#FAF8F5] border-t border-[#EAE2D8]">
+  <div class="max-w-7xl mx-auto">
+    <!-- Editorial Heading -->
+    <div class="max-w-3xl mb-12 sm:mb-16">
+      <div class="flex items-center gap-2 text-xs uppercase tracking-[0.25em] text-[#8C827A] font-medium mb-3">
+        <span class="text-[#C87D65]">✦</span>
+        <span>{{ section.settings.kicker }}</span>
+      </div>
+      <h2 class="font-editorial text-3xl sm:text-5xl lg:text-6xl text-[#24211E] font-normal tracking-tight leading-[1.12] mb-6">
+        {{ section.settings.heading_main }} <br>
+        <span class="italic text-[#8C9A86]">{{ section.settings.heading_italic }}</span>
+      </h2>
+      <p class="text-base sm:text-lg text-[#574E45] font-light leading-relaxed">
+        {{ section.settings.description }}
+      </p>
+    </div>
+
+    <!-- 01. HORIZONTAL PROGRESS STEPPER -->
+    <div id="process" class="mb-8">
+      <div class="flex items-center justify-between mb-4">
+        <span class="text-xs uppercase tracking-widest text-[#8C827A] font-medium">
+          5-Stage Craft Journey
+        </span>
+        <div class="flex items-center gap-2 text-xs font-mono text-[#24211E]">
+          <span id="wolko-craft-stage-label" class="text-[#C87D65] font-bold">Stage 01</span>
+          <span class="text-[#D9CFC4]">/</span>
+          <span class="text-[#8C827A]">05</span>
+        </div>
+      </div>
+
+      <div class="relative">
+        <div class="hidden sm:block absolute top-1/2 left-0 right-0 h-0.5 bg-[#EAE2D8] -translate-y-1/2 z-0"></div>
+        <div id="wolko-craft-progress-bar" class="hidden sm:block absolute top-1/2 left-0 h-0.5 bg-[#24211E] -translate-y-1/2 z-0 transition-all duration-500 ease-out" style="width: 0%"></div>
+
+        <div class="relative z-10 flex items-center justify-between gap-2 overflow-x-auto pb-2 sm:pb-0 scrollbar-none">
+          <button type="button" data-craft-step="0" class="wolko-craft-step-btn shrink-0 flex items-center gap-2.5 px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-full border transition-all duration-300 bg-[#24211E] text-white border-[#24211E] shadow-sm">
+            <span class="w-6 h-6 rounded-full flex items-center justify-center font-mono text-xs font-semibold bg-[#FAF8F5] text-[#24211E]">01</span>
+            <span class="text-xs font-medium tracking-wide whitespace-nowrap">Choose the Fiber</span>
+          </button>
+          <button type="button" data-craft-step="1" class="wolko-craft-step-btn shrink-0 flex items-center gap-2.5 px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-full border transition-all duration-300 bg-white/80 text-[#6B6158] border-[#EAE2D8]">
+            <span class="w-6 h-6 rounded-full flex items-center justify-center font-mono text-xs font-semibold bg-[#F5EFEB] text-[#8C827A]">02</span>
+            <span class="text-xs font-medium tracking-wide whitespace-nowrap">Finger-Loop &amp; Shape</span>
+          </button>
+          <button type="button" data-craft-step="2" class="wolko-craft-step-btn shrink-0 flex items-center gap-2.5 px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-full border transition-all duration-300 bg-white/80 text-[#6B6158] border-[#EAE2D8]">
+            <span class="w-6 h-6 rounded-full flex items-center justify-center font-mono text-xs font-semibold bg-[#F5EFEB] text-[#8C827A]">03</span>
+            <span class="text-xs font-medium tracking-wide whitespace-nowrap">Botanical Needlework</span>
+          </button>
+          <button type="button" data-craft-step="3" class="wolko-craft-step-btn shrink-0 flex items-center gap-2.5 px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-full border transition-all duration-300 bg-white/80 text-[#6B6158] border-[#EAE2D8]">
+            <span class="w-6 h-6 rounded-full flex items-center justify-center font-mono text-xs font-semibold bg-[#F5EFEB] text-[#8C827A]">04</span>
+            <span class="text-xs font-medium tracking-wide whitespace-nowrap">Natural Steam Blocking</span>
+          </button>
+          <button type="button" data-craft-step="4" class="wolko-craft-step-btn shrink-0 flex items-center gap-2.5 px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-full border transition-all duration-300 bg-white/80 text-[#6B6158] border-[#EAE2D8]">
+            <span class="w-6 h-6 rounded-full flex items-center justify-center font-mono text-xs font-semibold bg-[#F5EFEB] text-[#8C827A]">05</span>
+            <span class="text-xs font-medium tracking-wide whitespace-nowrap">Made Just for You</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 02. INTERACTIVE STAGE SHOWCASE CARD -->
+    <div id="wolko-craft-card" class="bg-white rounded-3xl border border-[#EAE2D8] shadow-[0_12px_40px_rgba(36,33,30,0.06)] overflow-hidden">
+      <!-- Populated and updated interactively by wolko-theme.js -->
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Craft Story Timeline",
+  "settings": [
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker",
+      "default": "The Philosophy of Slow Hands"
+    },
+    {
+      "type": "text",
+      "id": "heading_main",
+      "label": "Main Heading",
+      "default": "Made slowly."
+    },
+    {
+      "type": "text",
+      "id": "heading_italic",
+      "label": "Italic Heading",
+      "default": "Because good things take time."
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "In our Indian artisan ateliers, we deliberately reject industrial assembly lines. Every Wolko creation begins as raw ethical merino wool roving, patiently sculpted row by row using fingers and traditional wooden hooks."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Craft Story Timeline"
+    }
+  ]
+}
+{% endschema %}

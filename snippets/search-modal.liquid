@@ -1,0 +1,47 @@
+<!-- Wolko Command Palette & Predictive Search Modal (⌘K) -->
+<div id="wolko-search-modal" class="fixed inset-0 z-50 overflow-y-auto hidden" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Search Collection">
+  <div data-close-search class="fixed inset-0 bg-[#24211E]/50 backdrop-blur-xs transition-opacity"></div>
+
+  <div class="relative min-h-screen flex items-start justify-center p-4 sm:pt-20">
+    <div class="relative w-full max-w-2xl bg-[#FAF8F5] rounded-2xl border border-[#EAE2D8] shadow-2xl overflow-hidden z-10">
+      <!-- Top Search Input Form -->
+      <form action="{{ routes.search_url }}" method="get" role="search" class="flex items-center px-5 py-4 bg-white border-b border-[#EAE2D8] gap-3">
+        <svg class="w-5 h-5 text-[#8C827A] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+        </svg>
+        <input
+          type="search"
+          name="q"
+          id="wolko-search-input"
+          value="{{ search.terms | escape }}"
+          placeholder="Search handcrafted bags, daisy charms, Diwali amigurumi, scrunchies..."
+          class="w-full bg-transparent text-sm sm:text-base text-[#24211E] placeholder-[#8C827A] focus:outline-none"
+          autocomplete="off"
+        >
+        <input type="hidden" name="options[prefix]" value="last">
+        <button
+          type="button"
+          data-close-search
+          class="px-2.5 py-1 text-[10px] font-mono uppercase tracking-wider bg-[#F5EFEB] text-[#6B6158] hover:text-[#24211E] rounded border border-[#D9CFC4]"
+        >
+          ESC
+        </button>
+      </form>
+
+      <!-- Quick Filter Pills -->
+      <div class="px-5 py-3 bg-[#F5EFEB]/70 border-b border-[#EAE2D8] flex items-center gap-2 overflow-x-auto scrollbar-none">
+        <span class="text-[10px] uppercase tracking-widest text-[#8C827A] font-medium shrink-0">Popular:</span>
+        <button type="button" data-search-pill="Cloud Tote" class="px-2.5 py-1 rounded-full bg-white border border-[#EAE2D8] text-xs text-[#4A443E] hover:border-[#24211E] shrink-0">Cloud Tote</button>
+        <button type="button" data-search-pill="Diwali" class="px-2.5 py-1 rounded-full bg-white border border-[#EAE2D8] text-xs text-[#8B2E1E] hover:border-[#24211E] shrink-0">🪔 Diwali Specials</button>
+        <button type="button" data-search-pill="Daisy Charm" class="px-2.5 py-1 rounded-full bg-white border border-[#EAE2D8] text-xs text-[#4A443E] hover:border-[#24211E] shrink-0">Daisy Charm</button>
+        <button type="button" data-search-pill="Scrunchie" class="px-2.5 py-1 rounded-full bg-white border border-[#EAE2D8] text-xs text-[#4A443E] hover:border-[#24211E] shrink-0">Scrunchies &amp; Bows</button>
+        <button type="button" data-search-pill="Gift" class="px-2.5 py-1 rounded-full bg-white border border-[#EAE2D8] text-xs text-[#4A443E] hover:border-[#24211E] shrink-0">Gift Boxes</button>
+      </div>
+
+      <!-- Instant Results Container -->
+      <div id="wolko-search-results" class="max-h-[60vh] overflow-y-auto p-4 divide-y divide-[#EAE2D8]/60">
+        <!-- Populated dynamically by wolko-theme.js -->
+      </div>
+    </div>
+  </div>
+</div>

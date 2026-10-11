@@ -1,0 +1,6 @@
+{
+  "name": "Wolko | Handcrafted Wool & Artisan Lifestyle",
+  "description": "Premium handcrafted wool products, keychains, cozy accessories, and slow-made artisan lifestyle goods crafted with warmth, patience, and care.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

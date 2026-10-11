@@ -1,0 +1,130 @@
+{
+  "sections": {
+    "hero": {
+      "type": "hero",
+      "settings": {
+        "kicker_1": "Artisan Studio",
+        "kicker_2": "Small Batch Wool",
+        "kicker_3": "Est. India",
+        "heading_line_1": "Woven by hand.",
+        "heading_italic": "Made to stay.",
+        "subtext": "Thoughtfully crafted wool pieces, everyday carry bags, and delicate botanical charms — created slowly with warmth, patience, and a human touch.",
+        "primary_btn_label": "Explore Collection",
+        "secondary_btn_label": "3D Spatial Experience",
+        "trust_rating": "4.9/5",
+        "trust_text": "Trusted by 1,280+ patrons across India · 100% Handcrafted"
+      }
+    },
+    "hero_3d_experience": {
+      "type": "hero-3d-experience",
+      "settings": {
+        "headline": "WOVEN BY HAND",
+        "tagline": "A 3D spatial celebration of slow craft, human patience & tactile merino wool"
+      }
+    },
+    "diwali_sale": {
+      "type": "diwali-sale",
+      "settings": {
+        "badge_text": "Shubh Diwali Limited Atelier Sale · शुभ दीपावली",
+        "heading": "Handcrafted Festival of Lights Editions",
+        "subtext": "Slowly crocheted with natural cotton-merino wool, pure joy, and festive blessings. Special Diwali gift sets, playful amigurumis, and royal floral adornments packaged in plastic-free seeded boxes with brass diyas.",
+        "promo_code": "DIWALISPARKLE"
+      }
+    },
+    "brand_statement": {
+      "type": "brand-statement",
+      "settings": {
+        "quote_main": "Small details. Slow hands.",
+        "quote_italic": "Something made just for you.",
+        "narrative": "In an era of mass-produced plastic objects, Wolko honors the quiet luxury of natural fibers, manual stitch-work, and personal intention. Every piece carries the warmth of the hands that held it first."
+      }
+    },
+    "featured_collection": {
+      "type": "featured-collection",
+      "settings": {
+        "kicker": "Curated Wool Objects",
+        "heading": "Pieces Worth Keeping",
+        "products_to_show": 17
+      }
+    },
+    "product_scroll_archive": {
+      "type": "product-scroll-archive",
+      "settings": {
+        "kicker": "The Tactile Archive",
+        "heading": "Signature Studio Works"
+      }
+    },
+    "craft_story": {
+      "type": "craft-story",
+      "settings": {
+        "kicker": "The Philosophy of Slow Hands",
+        "heading_main": "Made slowly.",
+        "heading_italic": "Because good things take time.",
+        "description": "In our Indian artisan ateliers, we deliberately reject industrial assembly lines. Every Wolko creation begins as raw ethical merino wool roving, patiently sculpted row by row using fingers and traditional wooden hooks."
+      }
+    },
+    "editorial_spotlight": {
+      "type": "editorial-spotlight",
+      "settings": {
+        "badge": "Campaign Edition 2026",
+        "kicker": "Heirloom Silhouette",
+        "heading_main": "Soft enough for everyday.",
+        "heading_italic": "Special enough to keep.",
+        "description": "Woven from a continuous spool of virgin Australian merino wool blend. The Cloud Tote molds effortlessly to your side, offering a pillowy weight that turns the simplest morning walk or cafe visit into a tactile luxury."
+      }
+    },
+    "category_discovery": {
+      "type": "category-discovery",
+      "settings": {
+        "kicker": "Artisan Catalog",
+        "heading": "Explore by Category",
+        "subtext": "Every object is slowly hand-looped or needle-worked in limited studio editions."
+      }
+    },
+    "marquee": {
+      "type": "marquee",
+      "settings": {
+        "show_marquee": true
+      }
+    },
+    "about_atelier": {
+      "type": "about-atelier",
+      "settings": {
+        "kicker": "The Origin Story",
+        "heading_main": "More than handmade.",
+        "heading_italic": "A slower way of living."
+      }
+    },
+    "trust_proof": {
+      "type": "trust-proof",
+      "settings": {
+        "kicker": "Pledge & Transparency",
+        "heading": "Made with Care. Chosen with Intention.",
+        "subtext": "Every order is treated like a personal gift from our studio to your doorstep."
+      }
+    },
+    "final_cta": {
+      "type": "final-cta",
+      "settings": {
+        "kicker": "Heirloom Wool Objects",
+        "heading": "Find something made for you.",
+        "subtext": "Custom color combinations, bridal gifting boxes, or an everyday companion piece for your favorite coat. We hand-weave each piece upon order."
+      }
+    }
+  },
+  "order": [
+    "hero",
+    "hero_3d_experience",
+    "diwali_sale",
+    "brand_statement",
+    "featured_collection",
+    "product_scroll_archive",
+    "craft_story",
+    "editorial_spotlight",
+    "category_discovery",
+    "marquee",
+    "about_atelier",
+    "trust_proof",
+    "final_cta"
+  ]
+}

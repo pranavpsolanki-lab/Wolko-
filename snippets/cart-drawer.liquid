@@ -1,0 +1,122 @@
+<!-- Wolko Slide-Over Shopify Cart Drawer -->
+<div id="wolko-cart-drawer" class="fixed inset-0 z-50 overflow-hidden hidden" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Your Shopping Bag">
+  <!-- Backdrop -->
+  <div
+    data-close-cart
+    class="absolute inset-0 bg-[#24211E]/40 backdrop-blur-xs transition-opacity duration-300"
+  ></div>
+
+  <div class="absolute inset-y-0 right-0 max-w-full flex pl-10">
+    <div class="w-screen max-w-md bg-[#FAF8F5] shadow-2xl flex flex-col border-l border-[#EAE2D8]">
+      <!-- Header -->
+      <div class="px-6 py-5 border-b border-[#EAE2D8] flex items-center justify-between bg-white">
+        <div class="flex items-center gap-2">
+          <svg class="w-4 h-4 text-[#24211E]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>
+          </svg>
+          <h2 class="font-editorial text-xl font-medium text-[#24211E]">
+            {{ 'templates.cart.cart' | t }}
+          </h2>
+          <span id="wolko-cart-drawer-count" class="text-xs font-mono text-[#8C827A] tabular-nums">
+            ({{ cart.item_count }})
+          </span>
+        </div>
+        <button
+          type="button"
+          data-close-cart
+          class="p-1.5 text-[#8C827A] hover:text-[#24211E] rounded-full hover:bg-[#F5EFEB] transition-colors"
+          aria-label="Close cart"
+        >
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Free Shipping Progress Indicator -->
+      {%- assign threshold_rupees = settings.free_shipping_threshold | default: 1999 -%}
+      <div class="px-6 py-3.5 bg-[#F5EFEB] border-b border-[#EAE2D8]">
+        <div id="wolko-shipping-text" class="flex items-center justify-between text-xs mb-1.5 font-light text-[#574E45]">
+          Free Express Shipping across India on orders above ₹{{ threshold_rupees }}
+        </div>
+        <div class="w-full h-1.5 bg-[#EAE2D8] rounded-full overflow-hidden">
+          <div
+            id="wolko-shipping-bar"
+            class="h-full bg-[#24211E] transition-all duration-300 rounded-full"
+            style="width: 0%"
+          ></div>
+        </div>
+      </div>
+
+      <!-- Cart Item List -->
+      <div id="wolko-cart-items" class="flex-1 overflow-y-auto px-6 py-6 divide-y divide-[#EAE2D8]/80">
+        <!-- Populated dynamically via Shopify /cart.js + Wolko Cart Engine -->
+      </div>
+
+      <!-- Complimentary Handwritten Gift Note -->
+      {%- if settings.enable_gift_note -%}
+        <div id="wolko-gift-note-wrap" class="px-6 pt-3 pb-2 bg-[#FAF8F5] border-t border-[#EAE2D8] hidden">
+          <button
+            type="button"
+            id="wolko-gift-note-toggle"
+            class="flex items-center gap-2 text-xs text-[#574E45] hover:text-[#24211E] font-medium mb-2"
+          >
+            <span class="text-[#C87D65]">✦</span>
+            <span>Add complimentary handwritten seed-paper gift note</span>
+          </button>
+          <div id="wolko-gift-note-box" class="hidden mt-1 mb-2">
+            <textarea
+              id="wolko-cart-note-input"
+              name="note"
+              placeholder="Write your personal message here. We will scribe it with ink on seed paper..."
+              class="w-full text-xs p-3 rounded-lg border border-[#D9CFC4] bg-white text-[#24211E] focus:outline-none focus:border-[#24211E]"
+              rows="2"
+            >{{ cart.note }}</textarea>
+          </div>
+        </div>
+      {%- endif -%}
+
+      <!-- Footer with Subtotal & Checkout -->
+      <div id="wolko-cart-footer" class="p-6 border-t border-[#EAE2D8] bg-white space-y-3">
+        <div class="flex items-center justify-between text-xs text-[#8C827A]">
+          <span>Taxes &amp; Artisan Seed-Paper Packaging</span>
+          <span class="text-[#7B8A78] font-medium">Included</span>
+        </div>
+
+        <div class="flex items-baseline justify-between pt-1">
+          <span class="text-sm font-medium text-[#24211E]">{{ 'templates.cart.subtotal' | t }}</span>
+          <span id="wolko-cart-subtotal" class="font-mono text-xl font-semibold text-[#24211E] tabular-nums">
+            {{ cart.total_price | money }}
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 gap-2.5 pt-1">
+          <a
+            href="/checkout"
+            id="wolko-shopify-checkout-btn"
+            class="w-full py-3.5 px-6 bg-[#24211E] hover:bg-[#3A3530] text-[#FAF8F5] text-xs uppercase tracking-widest font-semibold rounded-full transition-all duration-200 shadow-md flex items-center justify-center gap-2 text-center"
+          >
+            <span>{{ 'templates.cart.checkout' | t }}</span>
+            <span>&rarr;</span>
+          </a>
+
+          <button
+            type="button"
+            id="wolko-whatsapp-checkout-btn"
+            class="w-full py-2.5 px-4 bg-[#25D366]/15 hover:bg-[#25D366] text-[#128C7E] hover:text-white border border-[#25D366]/40 text-xs font-semibold rounded-full transition-all flex items-center justify-center gap-2"
+          >
+            <span>Order &amp; Confirm via WhatsApp</span>
+          </button>
+        </div>
+
+        <button
+          type="button"
+          data-close-cart
+          class="w-full text-center text-xs text-[#8C827A] hover:text-[#24211E] transition-colors pt-1"
+        >
+          {{ 'templates.cart.continue_shopping' | t }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

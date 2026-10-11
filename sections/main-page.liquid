@@ -1,0 +1,20 @@
+<section class="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-[#FAF8F5]">
+  <div class="max-w-3xl mx-auto bg-white p-8 sm:p-12 rounded-3xl border border-[#EAE2D8]">
+    <div class="text-xs uppercase tracking-[0.2em] text-[#8C827A] font-medium mb-2">
+      Wolko Studio
+    </div>
+    <h1 class="font-editorial text-3xl sm:text-5xl text-[#24211E] font-normal mb-8 pb-6 border-b border-[#EAE2D8]">
+      {{ page.title }}
+    </h1>
+    <div class="prose prose-sm sm:prose-base text-[#4A443E] font-light leading-relaxed space-y-4">
+      {{ page.content }}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Page Content",
+  "settings": []
+}
+{% endschema %}

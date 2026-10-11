@@ -1,0 +1,168 @@
+{%- assign wa_primary = settings.whatsapp_primary | default: '918237323043' -%}
+{%- assign wa_backup = settings.whatsapp_backup | default: '918591542015' -%}
+{%- assign diwali_collection = collections[section.settings.collection] -%}
+
+<section id="diwali-sale" class="relative py-16 sm:py-24 bg-[#FAF5EE] border-b border-[#EAE2D8] overflow-hidden">
+  <!-- Decorative festive golden glow accents -->
+  <div class="absolute -top-32 -left-32 w-96 h-96 bg-amber-200/30 rounded-full blur-3xl pointer-events-none"></div>
+  <div class="absolute -bottom-32 -right-32 w-96 h-96 bg-rose-200/30 rounded-full blur-3xl pointer-events-none"></div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+    <!-- Festive Header Banner -->
+    <div class="text-center max-w-3xl mx-auto mb-10 sm:mb-14">
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-amber-500/15 via-rose-500/15 to-amber-500/15 border border-amber-400/40 text-[#8B2E1E] text-xs font-semibold uppercase tracking-widest mb-4 shadow-xs">
+        <span>🪔</span>
+        <span>{{ section.settings.badge_text }}</span>
+        <span>🪔</span>
+      </div>
+
+      <h2 class="font-editorial text-3xl sm:text-5xl lg:text-6xl text-[#24211E] font-medium tracking-tight mb-4 leading-tight">
+        {{ section.settings.heading }}
+      </h2>
+
+      <p class="text-xs sm:text-base text-[#6B6158] font-light leading-relaxed max-w-2xl mx-auto">
+        {{ section.settings.subtext }}
+      </p>
+
+      <!-- Festive Promo Highlights -->
+      <div class="mt-6 flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs text-[#574E45]">
+        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/80 border border-[#EAE2D8]">
+          <span class="text-[#C87D65]">🏷️</span>
+          <span>Use Code <strong class="font-mono text-[#24211E]">{{ section.settings.promo_code }}</strong> for Free Gift Box</span>
+        </div>
+        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/80 border border-[#EAE2D8]">
+          <span class="text-amber-600">✦</span>
+          <span>Flat 15%–25% Festive Discount Applied</span>
+        </div>
+        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/80 border border-[#EAE2D8]">
+          <span class="text-[#25D366]">●</span>
+          <span>Instant WhatsApp Confirmation</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="flex items-center justify-center gap-2 sm:gap-3 overflow-x-auto pb-4 mb-8 sm:mb-12 scrollbar-none">
+      <button
+        type="button"
+        data-diwali-tab="all"
+        class="wolko-diwali-tab px-4 sm:px-5 py-2 rounded-full text-xs font-medium transition-all bg-[#24211E] text-white shadow-sm"
+      >
+        All Festive Specials (10)
+      </button>
+      <button
+        type="button"
+        data-diwali-tab="toys"
+        class="wolko-diwali-tab px-4 sm:px-5 py-2 rounded-full text-xs font-medium transition-all bg-white/80 text-[#6B6158] border border-[#EAE2D8] hover:border-[#24211E]"
+      >
+        Amigurumi Plush &amp; Charms
+      </button>
+      <button
+        type="button"
+        data-diwali-tab="adornments"
+        class="wolko-diwali-tab px-4 sm:px-5 py-2 rounded-full text-xs font-medium transition-all bg-white/80 text-[#6B6158] border border-[#EAE2D8] hover:border-[#24211E]"
+      >
+        Festive Bows &amp; Hair Garland
+      </button>
+      <button
+        type="button"
+        data-diwali-tab="decor"
+        class="wolko-diwali-tab px-4 sm:px-5 py-2 rounded-full text-xs font-medium transition-all bg-white/80 text-[#6B6158] border border-[#EAE2D8] hover:border-[#24211E]"
+      >
+        Prosperity Potted Garden
+      </button>
+    </div>
+
+    <!-- Dynamic Shopify Collection Products OR Wolko Built-In Diwali Catalog Grid -->
+    {%- if diwali_collection != blank and diwali_collection.products_count > 0 -%}
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-7">
+        {%- for product in diwali_collection.products limit: 12 -%}
+          {% render 'product-card', product: product %}
+        {%- endfor -%}
+      </div>
+    {%- else -%}
+      <div id="wolko-diwali-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-7">
+        <!-- Populated automatically by wolko-theme.js from Wolko's 10 Diwali Specials with full variant swatches, Add to Bag & Buy Now -->
+      </div>
+    {%- endif -%}
+
+    <!-- Bottom Banner with WhatsApp Assistance -->
+    <div class="mt-12 sm:mt-16 p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-[#24211E] via-[#332B25] to-[#24211E] text-white flex flex-col md:flex-row items-center justify-between gap-6 border border-amber-500/30 shadow-xl">
+      <div class="text-center md:text-left">
+        <div class="flex items-center justify-center md:justify-start gap-2 mb-2">
+          <span class="text-amber-400">✦</span>
+          <span class="text-xs uppercase tracking-widest text-amber-300 font-medium">
+            Custom Diwali Bulk &amp; Return Gifting
+          </span>
+        </div>
+        <h3 class="font-editorial text-2xl sm:text-3xl font-normal">
+          Need personalized gift hampers or custom color themes?
+        </h3>
+        <p class="text-xs sm:text-sm text-[#D9CFC4] font-light mt-1 max-w-xl">
+          Connect directly with our master artisan on WhatsApp (+{{ wa_primary }} &amp; +{{ wa_backup }}). We craft personalized letterpress gift notes and bulk wedding/Diwali favor sets.
+        </p>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-3">
+        <a
+          href="https://wa.me/{{ wa_primary }}?text=Hi%20Wolko!%20I%20am%20interested%20in%20Diwali%20custom%20gift%20hampers%20and%20bulk%20orders."
+          target="_blank"
+          rel="noopener noreferrer"
+          class="py-3 px-6 rounded-full bg-[#25D366] hover:bg-[#20BA5A] text-white text-xs font-semibold tracking-wider uppercase flex items-center gap-2 shadow-lg transition-transform active:scale-95"
+        >
+          <span>Chat on WhatsApp ({{ wa_primary }})</span>
+        </a>
+        <a
+          href="https://wa.me/{{ wa_backup }}?text=Hi%20Wolko!%20Inquiring%20about%20Diwali%20order%20support."
+          target="_blank"
+          rel="noopener noreferrer"
+          class="py-3 px-5 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-medium flex items-center gap-1.5 transition-colors"
+        >
+          <span>Backup Support ({{ wa_backup }})</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Shubh Diwali Sale",
+  "settings": [
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Optional Shopify Collection (Leave blank to display Wolko 10 Festive Specials)"
+    },
+    {
+      "type": "text",
+      "id": "badge_text",
+      "label": "Festive Kicker Badge",
+      "default": "Shubh Diwali Limited Atelier Sale · शुभ दीपावली"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Section Heading",
+      "default": "Handcrafted Festival of Lights Editions"
+    },
+    {
+      "type": "textarea",
+      "id": "subtext",
+      "label": "Description",
+      "default": "Slowly crocheted with natural cotton-merino wool, pure joy, and festive blessings. Special Diwali gift sets, playful amigurumis, and royal floral adornments packaged in plastic-free seeded boxes with brass diyas."
+    },
+    {
+      "type": "text",
+      "id": "promo_code",
+      "label": "Promo Code",
+      "default": "DIWALISPARKLE"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Shubh Diwali Sale"
+    }
+  ]
+}
+{% endschema %}

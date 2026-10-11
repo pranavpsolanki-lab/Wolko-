@@ -1,0 +1,23 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-collection",
+      "settings": {
+        "products_per_page": 24,
+        "enable_filtering": true
+      }
+    },
+    "trust_proof": {
+      "type": "trust-proof",
+      "settings": {
+        "kicker": "Pledge & Transparency",
+        "heading": "Made with Care. Chosen with Intention.",
+        "subtext": "Every order is treated like a personal gift from our studio to your doorstep."
+      }
+    }
+  },
+  "order": [
+    "main",
+    "trust_proof"
+  ]
+}

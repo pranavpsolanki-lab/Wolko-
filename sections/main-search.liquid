@@ -1,0 +1,62 @@
+<section class="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-[#FAF8F5]">
+  <div class="max-w-7xl mx-auto">
+    <div class="max-w-2xl mx-auto text-center mb-12">
+      <h1 class="font-editorial text-3xl sm:text-5xl text-[#24211E] font-normal mb-6">
+        {%- if search.performed -%}
+          Search Results for &ldquo;{{ search.terms | escape }}&rdquo;
+        {%- else -%}
+          {{ 'general.search.search' | t }}
+        {%- endif -%}
+      </h1>
+
+      <form action="{{ routes.search_url }}" method="get" role="search" class="flex items-center gap-2 bg-white p-2 rounded-full border border-[#D9CFC4] shadow-xs">
+        <input
+          type="search"
+          name="q"
+          value="{{ search.terms | escape }}"
+          placeholder="{{ 'general.search.placeholder' | t }}"
+          class="flex-1 px-4 py-2 bg-transparent text-sm text-[#24211E] focus:outline-none"
+        >
+        <input type="hidden" name="options[prefix]" value="last">
+        <button type="submit" class="px-6 py-2.5 bg-[#24211E] text-white text-xs uppercase tracking-wider font-medium rounded-full">
+          Search
+        </button>
+      </form>
+    </div>
+
+    {%- if search.performed -%}
+      {%- if search.results_count > 0 -%}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {%- for item in search.results -%}
+            {%- if item.object_type == 'product' -%}
+              {% render 'product-card', product: item %}
+            {%- else -%}
+              <article class="bg-white p-6 rounded-xl border border-[#EAE2D8] flex flex-col justify-between">
+                <div>
+                  <span class="text-[10px] uppercase tracking-widest text-[#8C827A]">{{ item.object_type }}</span>
+                  <h3 class="font-editorial text-xl text-[#24211E] mt-1 mb-2">
+                    <a href="{{ item.url }}" class="hover:text-[#C87D65]">{{ item.title }}</a>
+                  </h3>
+                  <p class="text-xs text-[#6B6158] font-light">{{ item.content | strip_html | truncate: 140 }}</p>
+                </div>
+                <a href="{{ item.url }}" class="text-xs font-medium text-[#24211E] mt-4 inline-block">Read more &rarr;</a>
+              </article>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      {%- else -%}
+        <div class="text-center py-12 bg-white rounded-2xl border border-[#EAE2D8]">
+          <p class="font-editorial text-2xl text-[#24211E] mb-2">{{ 'general.search.no_results' | t }}</p>
+          <a href="{{ routes.root_url }}#collection" class="text-xs uppercase tracking-wider text-[#C87D65] underline">Browse full studio catalog</a>
+        </div>
+      {%- endif -%}
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Search Results",
+  "settings": []
+}
+{% endschema %}

@@ -1,0 +1,128 @@
+<section class="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 bg-[#F5EFEB] border-t border-[#EAE2D8]">
+  <div class="max-w-7xl mx-auto">
+    <div class="relative rounded-3xl overflow-hidden bg-white border border-[#EAE2D8] shadow-sm">
+      <div class="grid grid-cols-1 lg:grid-cols-12 min-h-[580px]">
+        <!-- Visual Campaign Half (7 cols) -->
+        <div class="lg:col-span-7 relative overflow-hidden bg-[#FAF8F5]">
+          <img
+            src="{{ 'product_chunky_tote_1790489298255.jpg' | asset_url }}"
+            alt="Wolko Chunky Cloud Tote Editorial Campaign"
+            class="w-full h-full object-cover object-center min-h-[380px] lg:min-h-full hover:scale-105 transition-transform duration-1000 ease-out"
+            loading="lazy"
+            width="1000"
+            height="800"
+          >
+          <div class="absolute top-6 left-6">
+            <span class="inline-flex items-center gap-1.5 bg-[#24211E]/85 backdrop-blur-xs text-[#FAF8F5] text-[11px] tracking-widest uppercase font-medium px-3.5 py-1.5 rounded-full">
+              <span class="text-[#E8B4B8]">✦</span>
+              <span>{{ section.settings.badge }}</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Editorial Floating Narrative (5 cols) -->
+        <div class="lg:col-span-5 p-8 sm:p-12 lg:p-16 flex flex-col justify-between bg-white">
+          <div>
+            <div class="text-xs uppercase tracking-[0.25em] text-[#8C827A] font-medium mb-3">
+              {{ section.settings.kicker }}
+            </div>
+
+            <h2 class="font-editorial text-3xl sm:text-4xl lg:text-5xl font-normal text-[#24211E] tracking-tight leading-[1.15] mb-6">
+              {{ section.settings.heading_main }} <br>
+              <span class="italic text-[#C87D65]">{{ section.settings.heading_italic }}</span>
+            </h2>
+
+            <p class="text-sm sm:text-base text-[#574E45] font-light leading-relaxed mb-6">
+              {{ section.settings.description }}
+            </p>
+
+            <div class="space-y-2 mb-8 text-xs text-[#6B6158]">
+              <div class="flex items-center gap-2">
+                <span class="w-1.5 h-1.5 rounded-full bg-[#7B8A78]"></span>
+                <span>Single-piece seamless construction</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-1.5 h-1.5 rounded-full bg-[#7B8A78]"></span>
+                <span>Braided handles with ergonomic tension balance</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-1.5 h-1.5 rounded-full bg-[#7B8A78]"></span>
+                <span>Hand-stamped brass authentication tag</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-6 border-t border-[#F0EBE4]">
+            <div class="flex items-baseline justify-between mb-4">
+              <span class="text-xs uppercase tracking-wider text-[#8C827A]">Price</span>
+              <span class="font-mono text-xl font-semibold text-[#24211E] tabular-nums">
+                ₹3,450
+              </span>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <button
+                type="button"
+                data-add-catalog-id="chunky-cloud-tote"
+                class="flex-1 py-3 px-6 bg-[#24211E] hover:bg-[#3A3530] text-[#FAF8F5] text-xs uppercase tracking-widest font-medium rounded-full transition-all duration-200 text-center shadow-xs"
+              >
+                Add to Bag
+              </button>
+              <button
+                type="button"
+                data-open-product-id="chunky-cloud-tote"
+                class="py-3 px-5 border border-[#D9CFC4] hover:bg-[#FAF8F5] text-[#24211E] text-xs uppercase tracking-widest font-medium rounded-full transition-all flex items-center justify-center gap-1"
+              >
+                <span>View Piece</span>
+                <span>&#8599;</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Editorial Spotlight",
+  "settings": [
+    {
+      "type": "text",
+      "id": "badge",
+      "label": "Campaign Badge",
+      "default": "Campaign Edition 2026"
+    },
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker",
+      "default": "Heirloom Silhouette"
+    },
+    {
+      "type": "text",
+      "id": "heading_main",
+      "label": "Heading Line 1",
+      "default": "Soft enough for everyday."
+    },
+    {
+      "type": "text",
+      "id": "heading_italic",
+      "label": "Heading Italic Line",
+      "default": "Special enough to keep."
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "Woven from a continuous spool of virgin Australian merino wool blend. The Cloud Tote molds effortlessly to your side, offering a pillowy weight that turns the simplest morning walk or cafe visit into a tactile luxury."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Editorial Spotlight"
+    }
+  ]
+}
+{% endschema %}

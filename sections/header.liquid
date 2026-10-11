@@ -1,0 +1,294 @@
+{%- assign wa_primary = settings.whatsapp_primary | default: '918237323043' -%}
+{%- assign ig_url = settings.social_instagram_link | default: 'https://www.instagram.com/shop_wolko' -%}
+
+<header
+  id="wolko-header"
+  class="sticky top-0 z-40 w-full transition-all duration-300 bg-[#FAF8F5]/95 backdrop-blur-md border-b border-[#EAE2D8]/80 py-3.5 shadow-[0_2px_12px_rgba(36,33,30,0.03)]"
+>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between">
+      <!-- Zone 1: Logo & Brand Lockup -->
+      <div class="flex items-center gap-3">
+        <a href="{{ routes.root_url }}" class="group flex items-center gap-2.5 focus:outline-none">
+          <div class="relative w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden border border-[#EAE2D8] bg-white shadow-xs group-hover:scale-105 transition-transform duration-200">
+            {%- if settings.logo != blank -%}
+              <img
+                src="{{ settings.logo | image_url: width: 120 }}"
+                alt="{{ shop.name | escape }}"
+                class="w-full h-full object-cover"
+                width="40"
+                height="40"
+              >
+            {%- else -%}
+              <img
+                src="{{ 'wolko_logo_1790489253517.jpg' | asset_url }}"
+                alt="Wolko Handmade Artisan Studio"
+                class="w-full h-full object-cover"
+                width="40"
+                height="40"
+              >
+            {%- endif -%}
+          </div>
+          <div class="flex flex-col">
+            <span class="font-editorial text-xl sm:text-2xl font-semibold tracking-wider text-[#24211E] uppercase leading-none">
+              {{ shop.name | default: 'Wolko' }}
+            </span>
+            <span class="text-[9px] tracking-[0.2em] uppercase text-[#8C827A] font-light mt-0.5">
+              {{ settings.brand_tagline | default: 'Slow Crafted' }}
+            </span>
+          </div>
+        </a>
+      </div>
+
+      <!-- Zone 2: Navigation Links (Desktop) -->
+      <nav class="hidden md:flex items-center gap-6 lg:gap-7 text-[13px] tracking-wide font-medium text-[#4A443E]" aria-label="Main Navigation">
+        {%- if section.settings.show_diwali_pill -%}
+          <a
+            href="{{ routes.root_url }}#diwali-sale"
+            class="px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/15 to-rose-500/15 border border-amber-400/50 text-[#8B2E1E] hover:text-[#701E10] font-semibold transition-all flex items-center gap-1.5 shadow-2xs hover:scale-105"
+          >
+            <span>🪔 Diwali Sale</span>
+            <span class="text-[9px] bg-rose-600 text-white font-mono font-bold px-1.5 py-0.2 rounded-full uppercase">
+              Offers
+            </span>
+          </a>
+        {%- endif -%}
+
+        <a
+          href="{{ routes.root_url }}#hero-3d-experience"
+          class="hover:text-[#24211E] transition-colors relative py-1 hover:underline underline-offset-8 decoration-[#C87D65] flex items-center gap-1.5"
+        >
+          <span>3D Spatial</span>
+          <span class="w-1.5 h-1.5 rounded-full bg-[#C87D65]"></span>
+        </a>
+        <a
+          href="{{ routes.root_url }}#collection"
+          class="hover:text-[#24211E] transition-colors relative py-1 hover:underline underline-offset-8 decoration-[#8C827A]"
+        >
+          Collection
+        </a>
+        <a
+          href="{{ routes.root_url }}#craft-story"
+          class="hover:text-[#24211E] transition-colors relative py-1 hover:underline underline-offset-8 decoration-[#8C827A]"
+        >
+          The Craft
+        </a>
+        <a
+          href="{{ routes.root_url }}#process"
+          class="hover:text-[#24211E] transition-colors relative py-1 hover:underline underline-offset-8 decoration-[#8C827A]"
+        >
+          Process
+        </a>
+        <a
+          href="{{ routes.root_url }}#about"
+          class="hover:text-[#24211E] transition-colors relative py-1 hover:underline underline-offset-8 decoration-[#8C827A]"
+        >
+          About Wolko
+        </a>
+        <a
+          href="{{ routes.root_url }}#contact"
+          class="hover:text-[#24211E] transition-colors relative py-1 hover:underline underline-offset-8 decoration-[#8C827A]"
+        >
+          Connect
+        </a>
+
+        {%- if section.settings.menu != blank and linklists[section.settings.menu].links.size > 0 -%}
+          {%- for link in linklists[section.settings.menu].links -%}
+            {%- unless link.title == 'Home' or link.title == 'Catalog' -%}
+              <a
+                href="{{ link.url }}"
+                class="hover:text-[#24211E] transition-colors relative py-1 hover:underline underline-offset-8 decoration-[#8C827A]"
+              >
+                {{ link.title }}
+              </a>
+            {%- endunless -%}
+          {%- endfor -%}
+        {%- endif -%}
+      </nav>
+
+      <!-- Zone 3: Actions (Search, Wishlist, WhatsApp, Instagram, Cart) -->
+      <div class="flex items-center gap-1.5 sm:gap-3">
+        <!-- Instagram Direct Link -->
+        <a
+          href="{{ ig_url }}"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="hidden sm:flex items-center justify-center w-8 h-8 rounded-full border border-[#D9CFC4] text-[#E8B4B8] hover:text-white hover:bg-[#24211E] transition-colors"
+          title="Follow Wolko on Instagram @shop_wolko"
+          aria-label="Instagram"
+        >
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
+          </svg>
+        </a>
+
+        <!-- WhatsApp Direct Chat -->
+        <a
+          href="https://wa.me/{{ wa_primary }}?text=Hi%20Wolko!%20I%20have%20an%20inquiry%20about%20your%20handcrafted%20crochet%20collection."
+          target="_blank"
+          rel="noopener noreferrer"
+          class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-[#25D366]/40 bg-[#25D366]/10 text-[#128C7E] hover:bg-[#25D366] hover:text-white text-xs font-medium transition-all shadow-2xs"
+          title="Chat on WhatsApp (+{{ wa_primary }})"
+          aria-label="WhatsApp Chat"
+        >
+          <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+            <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>
+          </svg>
+          <span class="hidden xl:inline text-[11px] font-semibold">WhatsApp</span>
+        </a>
+
+        <!-- Search Modal Trigger -->
+        <button
+          type="button"
+          data-open-search
+          class="flex items-center gap-1.5 p-2 sm:px-2.5 sm:py-1.5 text-[#4A443E] hover:text-[#24211E] transition-colors rounded-full hover:bg-[#EAE2D8]/50"
+          aria-label="Search collection (⌘K)"
+          title="Search collection (⌘K)"
+        >
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+          </svg>
+          <span class="hidden lg:inline text-[10px] font-mono text-[#8C827A] px-1.5 py-0.5 rounded bg-white/70 border border-[#D9CFC4]/70">
+            ⌘K
+          </span>
+        </button>
+
+        <!-- Wishlist Drawer Trigger -->
+        <button
+          type="button"
+          data-open-wishlist
+          class="p-2 text-[#4A443E] hover:text-[#24211E] transition-colors rounded-full hover:bg-[#EAE2D8]/50 relative"
+          aria-label="View saved pieces"
+          title="Saved pieces"
+        >
+          <svg class="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+          </svg>
+          <span id="wolko-wishlist-dot" class="hidden absolute top-1.5 right-1.5 w-2 h-2 bg-[#C87D65] rounded-full"></span>
+        </button>
+
+        <!-- Cart Drawer Trigger -->
+        <button
+          type="button"
+          data-open-cart
+          class="flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#D9CFC4] bg-white/70 hover:bg-white text-[#24211E] transition-all shadow-xs"
+          aria-label="View cart"
+        >
+          <svg class="w-4 h-4 text-[#24211E]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>
+          </svg>
+          <span id="wolko-header-cart-count" class="text-xs font-mono font-medium tabular-nums">
+            {{ cart.item_count }}
+          </span>
+        </button>
+
+        <!-- Mobile Menu Trigger -->
+        <button
+          type="button"
+          data-open-mobile-menu
+          class="md:hidden p-2 text-[#4A443E] hover:text-[#24211E]"
+          aria-label="Open navigation menu"
+        >
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Mobile Navigation Drawer -->
+<div id="wolko-mobile-menu" class="fixed inset-0 z-50 flex-col bg-[#FAF8F5] p-6 hidden md:hidden">
+  <div class="flex items-center justify-between pb-6 border-b border-[#EAE2D8]">
+    <div class="flex items-center gap-2">
+      <img
+        src="{{ 'wolko_logo_1790489253517.jpg' | asset_url }}"
+        alt="Wolko Logo"
+        class="w-8 h-8 rounded-full border border-[#EAE2D8] object-cover"
+        width="32"
+        height="32"
+      >
+      <span class="font-editorial text-xl font-semibold tracking-wider text-[#24211E]">
+        {{ shop.name | default: 'WOLKO' | upcase }}
+      </span>
+    </div>
+    <button
+      type="button"
+      data-close-mobile-menu
+      class="p-2 text-[#24211E] hover:bg-[#EAE2D8]/50 rounded-full"
+      aria-label="Close navigation menu"
+    >
+      &#10005;
+    </button>
+  </div>
+
+  <nav class="flex flex-col gap-4 py-6 text-xl font-editorial text-[#24211E]">
+    <a
+      href="{{ routes.root_url }}#diwali-sale"
+      data-close-mobile-menu
+      class="text-left py-2.5 px-3 rounded-xl bg-gradient-to-r from-amber-500/15 via-rose-500/15 to-transparent border border-amber-400/40 text-[#8B2E1E] transition-colors flex items-center justify-between font-semibold"
+    >
+      <span>🪔 Shubh Diwali Specials</span>
+      <span class="text-[10px] font-sans uppercase font-mono px-2 py-0.5 rounded-full bg-rose-600 text-white">
+        Offers Active
+      </span>
+    </a>
+    <a href="{{ routes.root_url }}#hero-3d-experience" data-close-mobile-menu class="py-2 hover:text-[#C87D65] border-b border-[#EAE2D8]/40 flex items-center justify-between">
+      <span>01. 3D Spatial Experience</span>
+      <span class="text-xs uppercase font-sans tracking-widest text-[#C87D65]">New</span>
+    </a>
+    <a href="{{ routes.root_url }}#collection" data-close-mobile-menu class="py-2 hover:text-[#C87D65] border-b border-[#EAE2D8]/40">
+      02. Shop Collection
+    </a>
+    <a href="{{ routes.root_url }}#craft-story" data-close-mobile-menu class="py-2 hover:text-[#C87D65] border-b border-[#EAE2D8]/40">
+      03. The Craft Story
+    </a>
+    <a href="{{ routes.root_url }}#process" data-close-mobile-menu class="py-2 hover:text-[#C87D65] border-b border-[#EAE2D8]/40">
+      04. Slow Process Timeline
+    </a>
+    <a href="{{ routes.root_url }}#about" data-close-mobile-menu class="py-2 hover:text-[#C87D65] border-b border-[#EAE2D8]/40">
+      05. About Our Studio
+    </a>
+    <a href="{{ routes.root_url }}#contact" data-close-mobile-menu class="py-2 hover:text-[#C87D65] border-b border-[#EAE2D8]/40">
+      06. Contact &amp; Inquiries
+    </a>
+  </nav>
+
+  <div class="mt-auto pt-6 border-t border-[#EAE2D8] flex flex-col gap-3">
+    <div class="flex items-center gap-2">
+      <a
+        href="https://wa.me/{{ wa_primary }}?text=Hi%20Wolko!%20I%20have%20an%20inquiry%20about%20your%20handcrafted%20crochet%20collection."
+        target="_blank"
+        rel="noopener noreferrer"
+        class="flex-1 py-2.5 px-4 rounded-xl bg-[#25D366] text-white text-xs font-semibold flex items-center justify-center gap-2"
+      >
+        <span>WhatsApp: +{{ wa_primary }}</span>
+      </a>
+    </div>
+    <div class="text-xs text-[#8C827A] flex flex-col gap-0.5">
+      <p>Backup Dispatch: +{{ settings.whatsapp_backup | default: '918591542015' }}</p>
+      <p>Email: {{ settings.studio_email | default: 'connectwithwolko@gmail.com' }}</p>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Header",
+  "settings": [
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Navigation Menu",
+      "default": "main-menu"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_diwali_pill",
+      "label": "Show Diwali Sale Highlight Pill",
+      "default": true
+    }
+  ]
+}
+{% endschema %}

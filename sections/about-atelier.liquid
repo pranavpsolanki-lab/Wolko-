@@ -1,0 +1,117 @@
+<section id="about" class="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 bg-[#FAF8F5]">
+  <div class="max-w-7xl mx-auto">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+      <!-- Editorial Photographic Composition (6 cols) -->
+      <div class="lg:col-span-6 relative">
+        <div class="relative rounded-2xl overflow-hidden border border-[#EAE2D8] bg-[#F5EFEB] shadow-sm">
+          <img
+            src="{{ 'hero_artisan_table_1790489280617.jpg' | asset_url }}"
+            alt="Wolko Artisan Studio Workbench"
+            class="w-full aspect-[4/5] object-cover"
+            loading="lazy"
+            width="800"
+            height="1000"
+          >
+        </div>
+
+        <!-- Overlapping small accent card -->
+        <div class="absolute -bottom-6 -right-4 sm:-right-6 max-w-xs bg-white p-5 rounded-xl border border-[#EAE2D8] shadow-md hidden sm:block">
+          <div class="flex items-center gap-3 mb-2">
+            <img
+              src="{{ 'wolko_logo_1790489253517.jpg' | asset_url }}"
+              alt="Wolko Brandmark"
+              class="w-9 h-9 rounded-full border border-[#EAE2D8] object-cover"
+              width="36"
+              height="36"
+            >
+            <div>
+              <h4 class="font-editorial text-sm font-semibold text-[#24211E]">
+                The Wolko Atelier
+              </h4>
+              <p class="text-[10px] text-[#8C827A] uppercase tracking-wider">
+                Handmade in India
+              </p>
+            </div>
+          </div>
+          <p class="text-xs text-[#574E45] font-light leading-relaxed">
+            &ldquo;Every skein of wool has a voice. We just give it time to speak.&rdquo;
+          </p>
+        </div>
+      </div>
+
+      <!-- Narrative Column (6 cols) -->
+      <div class="lg:col-span-6 flex flex-col justify-center">
+        <div class="text-xs uppercase tracking-[0.25em] text-[#8C827A] font-medium mb-3">
+          {{ section.settings.kicker }}
+        </div>
+
+        <h2 class="font-editorial text-3xl sm:text-5xl lg:text-6xl text-[#24211E] font-normal tracking-tight leading-[1.12] mb-6">
+          {{ section.settings.heading_main }} <br>
+          <span class="italic text-[#7B8A78]">{{ section.settings.heading_italic }}</span>
+        </h2>
+
+        <div class="space-y-4 text-base text-[#574E45] font-light leading-relaxed mb-8">
+          <p>
+            Wolko was founded with an honest devotion to tactile, cozy objects. In a marketplace dominated by synthetics and rushed manufacturing, we set out to build an atelier where hours are spent shaping a single handle or perfecting the petal contour of a wool charm.
+          </p>
+          <p>
+            We collaborate with passionate women artisans across India, providing dignified living wages and the creative freedom to practice generational textile skills. When you carry a Wolko bag or touch one of our botanical keychains, you are holding days of focused, patient human care.
+          </p>
+        </div>
+
+        <!-- Key Atelier Values -->
+        <div class="grid grid-cols-2 gap-6 pt-6 border-t border-[#EAE2D8] mb-8">
+          <div>
+            <span class="block font-mono text-xl sm:text-2xl font-semibold text-[#24211E]">100%</span>
+            <span class="text-xs text-[#8C827A] font-light">Direct artisan compensation</span>
+          </div>
+          <div>
+            <span class="block font-mono text-xl sm:text-2xl font-semibold text-[#24211E]">0%</span>
+            <span class="text-xs text-[#8C827A] font-light">Plastic waste in packaging</span>
+          </div>
+        </div>
+
+        <div>
+          <a
+            href="#contact"
+            class="inline-flex items-center gap-2 text-xs uppercase tracking-widest font-medium text-[#24211E] hover:text-[#C87D65] transition-colors border-b border-[#24211E] pb-1 hover:border-[#C87D65]"
+          >
+            <span>Read our artisan pledge</span>
+            <span>&#8599;</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "About Atelier",
+  "settings": [
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker",
+      "default": "The Origin Story"
+    },
+    {
+      "type": "text",
+      "id": "heading_main",
+      "label": "Heading Line 1",
+      "default": "More than handmade."
+    },
+    {
+      "type": "text",
+      "id": "heading_italic",
+      "label": "Heading Italic Line",
+      "default": "A slower way of living."
+    }
+  ],
+  "presets": [
+    {
+      "name": "About Atelier"
+    }
+  ]
+}
+{% endschema %}

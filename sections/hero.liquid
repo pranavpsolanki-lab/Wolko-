@@ -1,0 +1,174 @@
+<section id="hero" class="relative min-h-[92vh] flex items-center justify-center overflow-hidden bg-[#FAF8F5]">
+  <!-- Background Lifestyle Image with warm tactile gradient overlay -->
+  <div class="absolute inset-0 z-0 overflow-hidden">
+    {%- if section.settings.hero_image != blank -%}
+      <img
+        src="{{ section.settings.hero_image | image_url: width: 2000 }}"
+        alt="{{ section.settings.hero_image.alt | default: 'Wolko Artisan Workshop Studio Table' | escape }}"
+        class="w-full h-full object-cover object-center brightness-[0.92] contrast-[1.03] scale-100 sm:scale-105 transition-transform duration-1000 ease-out"
+        width="1920"
+        height="1080"
+      >
+    {%- else -%}
+      <img
+        src="{{ 'hero_artisan_table_1790489280617.jpg' | asset_url }}"
+        alt="Wolko Artisan Workshop Studio Table with Handcrafted Wool Products"
+        class="w-full h-full object-cover object-center brightness-[0.92] contrast-[1.03] scale-100 sm:scale-105 transition-transform duration-1000 ease-out"
+        width="1920"
+        height="1080"
+      >
+    {%- endif -%}
+    <div class="absolute inset-0 bg-gradient-to-t from-[#FAF8F5] via-[#FAF8F5]/60 to-[#FAF8F5]/80"></div>
+    <div class="absolute inset-0 bg-[#24211E]/10 mix-blend-multiply"></div>
+  </div>
+
+  <!-- Content Container -->
+  <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center flex flex-col items-center">
+    <!-- Quiet Brand Kicker -->
+    <div class="flex items-center gap-3 text-xs sm:text-sm tracking-[0.25em] uppercase text-[#6B6158] font-medium mb-6">
+      <span>{{ section.settings.kicker_1 }}</span>
+      <span aria-hidden="true">&middot;</span>
+      <span>{{ section.settings.kicker_2 }}</span>
+      <span aria-hidden="true">&middot;</span>
+      <span>{{ section.settings.kicker_3 }}</span>
+    </div>
+
+    <!-- Primary Editorial Headline -->
+    <h1 class="font-editorial text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-normal text-[#24211E] tracking-tight leading-[1.08] max-w-4xl mb-6 text-balance">
+      {{ section.settings.heading_line_1 }} <br>
+      <span class="italic font-light text-[#574E45]">{{ section.settings.heading_italic }}</span>
+    </h1>
+
+    <!-- Supporting Narrative -->
+    <p class="text-base sm:text-lg md:text-xl text-[#4A443E] max-w-2xl font-light leading-relaxed mb-10 text-balance">
+      {{ section.settings.subtext }}
+    </p>
+
+    <!-- Primary & Secondary Actions -->
+    <div class="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+      <a
+        href="#collection"
+        class="w-full sm:w-auto px-8 py-3.5 bg-[#24211E] hover:bg-[#3A3530] text-[#FAF8F5] text-sm tracking-wide font-medium rounded-full transition-all duration-200 shadow-sm flex items-center justify-center gap-2 group"
+      >
+        <span>{{ section.settings.primary_btn_label }}</span>
+        <span class="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform">&#8599;</span>
+      </a>
+
+      <a
+        href="#hero-3d-experience"
+        class="w-full sm:w-auto px-8 py-3.5 bg-white/80 hover:bg-white text-[#24211E] text-sm tracking-wide font-medium rounded-full border border-[#D9CFC4] transition-all duration-200 shadow-xs flex items-center justify-center gap-2"
+      >
+        <span>{{ section.settings.secondary_btn_label }}</span>
+        <span class="w-1.5 h-1.5 rounded-full bg-[#C87D65] animate-pulse"></span>
+      </a>
+    </div>
+
+    <!-- Social Proof Trust Layer -->
+    <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 bg-white/80 backdrop-blur-md px-6 py-2.5 rounded-full border border-[#EAE2D8] shadow-xs">
+      <div class="flex items-center -space-x-2">
+        <img src="{{ 'product_chunky_tote_1790489298255.jpg' | asset_url }}" alt="Patron 1" class="w-8 h-8 rounded-full border-2 border-white object-cover" width="32" height="32">
+        <img src="{{ 'product_daisy_charm_1790489314794.jpg' | asset_url }}" alt="Patron 2" class="w-8 h-8 rounded-full border-2 border-white object-cover" width="32" height="32">
+        <img src="{{ 'product_cozy_pouch_1790489355001.jpg' | asset_url }}" alt="Patron 3" class="w-8 h-8 rounded-full border-2 border-white object-cover" width="32" height="32">
+        <img src="{{ 'gift_box_trio_1790504996112.jpg' | asset_url }}" alt="Patron 4" class="w-8 h-8 rounded-full border-2 border-white object-cover" width="32" height="32">
+        <img src="{{ 'tulip_charm_1790504950604.jpg' | asset_url }}" alt="Patron 5" class="w-8 h-8 rounded-full border-2 border-white object-cover" width="32" height="32">
+      </div>
+      <div class="text-center sm:text-left sm:border-l sm:border-[#EAE2D8] sm:pl-4">
+        <div class="flex items-center justify-center sm:justify-start gap-1 text-[#C87D65] text-xs">
+          <span>★★★★★</span>
+          <span class="font-mono text-xs font-semibold text-[#24211E] ml-1">{{ section.settings.trust_rating }}</span>
+        </div>
+        <p class="text-[11px] text-[#6B6158] font-light">
+          {{ section.settings.trust_text }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Subtle Scroll Cue -->
+    <a
+      href="#hero-3d-experience"
+      class="mt-12 flex flex-col items-center gap-2 text-xs text-[#8C827A] hover:text-[#24211E] transition-colors focus:outline-none"
+      aria-label="Scroll to discover 3D experience"
+    >
+      <span class="tracking-widest uppercase text-[10px]">Discover 3D Craft</span>
+      <span class="animate-bounce">&darr;</span>
+    </a>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Cinematic Hero",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "hero_image",
+      "label": "Hero Background Image"
+    },
+    {
+      "type": "text",
+      "id": "kicker_1",
+      "label": "Kicker Tag 1",
+      "default": "Artisan Studio"
+    },
+    {
+      "type": "text",
+      "id": "kicker_2",
+      "label": "Kicker Tag 2",
+      "default": "Small Batch Wool"
+    },
+    {
+      "type": "text",
+      "id": "kicker_3",
+      "label": "Kicker Tag 3",
+      "default": "Est. India"
+    },
+    {
+      "type": "text",
+      "id": "heading_line_1",
+      "label": "Heading Line 1",
+      "default": "Woven by hand."
+    },
+    {
+      "type": "text",
+      "id": "heading_italic",
+      "label": "Heading Italic Line",
+      "default": "Made to stay."
+    },
+    {
+      "type": "textarea",
+      "id": "subtext",
+      "label": "Supporting Narrative",
+      "default": "Thoughtfully crafted wool pieces, everyday carry bags, and delicate botanical charms — created slowly with warmth, patience, and a human touch."
+    },
+    {
+      "type": "text",
+      "id": "primary_btn_label",
+      "label": "Primary Button Label",
+      "default": "Explore Collection"
+    },
+    {
+      "type": "text",
+      "id": "secondary_btn_label",
+      "label": "Secondary Button Label",
+      "default": "3D Spatial Experience"
+    },
+    {
+      "type": "text",
+      "id": "trust_rating",
+      "label": "Trust Rating",
+      "default": "4.9/5"
+    },
+    {
+      "type": "text",
+      "id": "trust_text",
+      "label": "Trust Subtitle",
+      "default": "Trusted by 1,280+ patrons across India · 100% Handcrafted"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Cinematic Hero"
+    }
+  ]
+}
+{% endschema %}

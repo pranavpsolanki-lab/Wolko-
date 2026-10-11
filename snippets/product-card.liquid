@@ -1,0 +1,119 @@
+{%- comment -%}
+  Renders a Wolko Artisan Product Card for a Shopify product object.
+  Accepts:
+  - product: {Object} Shopify Product Liquid object
+  - featured_layout: {Boolean} Optional taller card layout
+{%- endcomment -%}
+
+{%- if product and product != empty -%}
+  {%- assign first_variant = product.selected_or_first_available_variant -%}
+  {%- assign featured_img = product.featured_image | image_url: width: 900 -%}
+  {%- if featured_img == blank -%}
+    {%- assign featured_img = 'product_chunky_tote_1790489298255.jpg' | asset_url -%}
+  {%- endif -%}
+
+  <article
+    class="wolko-product-card group cursor-pointer flex flex-col bg-white rounded-xl border border-[#EAE2D8]/80 overflow-hidden transition-all duration-300 hover:shadow-[0_8px_30px_rgba(36,33,30,0.06)] hover:-translate-y-1 {% if featured_layout %}h-full{% endif %}"
+    data-product-handle="{{ product.handle }}"
+    data-product-id="{{ product.id }}"
+    data-variant-id="{{ first_variant.id }}"
+    data-product-title="{{ product.title | escape }}"
+    data-product-price="{{ product.price | divided_by: 100 }}"
+    data-product-image="{{ featured_img }}"
+    data-product-url="{{ product.url }}"
+  >
+    <!-- Image Container -->
+    <div class="relative aspect-[4/3] w-full overflow-hidden bg-[#F5EFEB]">
+      <a href="{{ product.url }}" class="block w-full h-full">
+        <img
+          src="{{ featured_img }}"
+          alt="{{ product.featured_image.alt | default: product.title | escape }}"
+          class="wolko-card-img w-full h-full object-cover object-center transition-all duration-500 ease-out group-hover:scale-105"
+          loading="lazy"
+          width="800"
+          height="600"
+        >
+      </a>
+
+      <!-- Badge -->
+      {%- if product.compare_at_price > product.price -%}
+        <div class="absolute top-3 left-3 pointer-events-none">
+          <span class="inline-block bg-[#FAF8F5]/90 backdrop-blur-xs text-[#24211E] text-[10px] tracking-wider uppercase font-medium px-2.5 py-1 rounded-sm border border-[#EAE2D8]">
+            Artisan Offer
+          </span>
+        </div>
+      {%- elsif product.tags contains 'Bestseller' or product.tags contains 'New' -%}
+        <div class="absolute top-3 left-3 pointer-events-none">
+          <span class="inline-block bg-[#FAF8F5]/90 backdrop-blur-xs text-[#24211E] text-[10px] tracking-wider uppercase font-medium px-2.5 py-1 rounded-sm border border-[#EAE2D8]">
+            {{ product.tags.first }}
+          </span>
+        </div>
+      {%- endif -%}
+
+      <!-- Wishlist Button -->
+      <button
+        type="button"
+        data-wishlist-toggle="{{ product.handle }}"
+        class="wolko-wishlist-btn absolute top-3 right-3 p-2 rounded-full transition-all duration-200 bg-white/80 backdrop-blur-xs text-[#4A443E] hover:text-[#24211E] hover:bg-white shadow-xs"
+        aria-label="Save to wishlist"
+      >
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+        </svg>
+      </button>
+
+      <!-- Quick Add Bar on Hover -->
+      <div class="absolute inset-x-3 bottom-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        {%- if first_variant.available -%}
+          <button
+            type="button"
+            data-quick-add-variant="{{ first_variant.id }}"
+            data-product-handle="{{ product.handle }}"
+            class="wolko-quick-add-btn w-full py-2.5 px-3 bg-[#24211E]/95 hover:bg-[#24211E] text-white text-xs font-medium tracking-wide rounded-lg shadow-md flex items-center justify-center gap-1.5 transition-transform active:scale-95"
+          >
+            <span>+ Quick Add &middot; {{ product.price | money }}</span>
+          </button>
+        {%- else -%}
+          <span class="w-full py-2.5 px-3 bg-[#8C827A]/90 text-white text-xs font-medium tracking-wide rounded-lg flex items-center justify-center">
+            {{ 'products.product.sold_out' | t }}
+          </span>
+        {%- endif -%}
+      </div>
+    </div>
+
+    <!-- Product Information -->
+    <div class="p-4 sm:p-5 flex-1 flex flex-col justify-between">
+      <div>
+        <div class="text-[11px] uppercase tracking-wider text-[#8C827A] font-medium mb-1">
+          {{ product.type | default: 'Handcrafted Wool' }}
+        </div>
+
+        <h3 class="font-editorial text-lg sm:text-xl text-[#24211E] font-medium leading-snug group-hover:text-[#C87D65] transition-colors mb-1.5">
+          <a href="{{ product.url }}">{{ product.title }}</a>
+        </h3>
+
+        <p class="text-xs text-[#6B6158] font-light line-clamp-2 leading-relaxed mb-3">
+          {{ product.description | strip_html | truncate: 110 }}
+        </p>
+      </div>
+
+      <!-- Bottom row: Link & Price -->
+      <div class="pt-3 border-t border-[#F0EBE4] flex items-center justify-between">
+        <a href="{{ product.url }}" class="text-[11px] uppercase tracking-wider text-[#6B6158] hover:text-[#24211E] font-medium">
+          View Piece &rarr;
+        </a>
+
+        <div class="flex items-baseline gap-2 font-mono text-sm tabular-nums">
+          <span class="font-semibold text-[#24211E]">
+            {{ product.price | money }}
+          </span>
+          {%- if product.compare_at_price > product.price -%}
+            <span class="text-xs text-[#A89E96] line-through">
+              {{ product.compare_at_price | money }}
+            </span>
+          {%- endif -%}
+        </div>
+      </div>
+    </div>
+  </article>
+{%- endif -%}

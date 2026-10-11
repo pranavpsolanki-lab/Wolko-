@@ -1,0 +1,86 @@
+<section class="relative py-28 sm:py-36 px-4 sm:px-6 lg:px-8 overflow-hidden bg-[#24211E] text-[#FAF8F5]">
+  <!-- Background with warm moody lighting -->
+  <div class="absolute inset-0 z-0 opacity-25">
+    <img
+      src="{{ 'hero_artisan_table_1790489280617.jpg' | asset_url }}"
+      alt="Wolko Handcrafted Woolen Lifestyle Background"
+      class="w-full h-full object-cover object-center scale-105"
+      loading="lazy"
+      width="1920"
+      height="1080"
+    >
+    <div class="absolute inset-0 bg-[#24211E]/80 mix-blend-multiply"></div>
+  </div>
+
+  <div class="relative z-10 max-w-4xl mx-auto text-center flex flex-col items-center">
+    <div class="w-14 h-14 rounded-full overflow-hidden border border-white/20 mb-6 bg-white/10 backdrop-blur-xs p-1">
+      <img
+        src="{{ 'wolko_logo_1790489253517.jpg' | asset_url }}"
+        alt="Wolko Logo Emblem"
+        class="w-full h-full object-cover rounded-full"
+        width="56"
+        height="56"
+      >
+    </div>
+
+    <div class="text-xs uppercase tracking-[0.3em] text-[#E8B4B8] font-medium mb-4">
+      {{ section.settings.kicker }}
+    </div>
+
+    <h2 class="font-editorial text-4xl sm:text-6xl md:text-7xl font-normal tracking-tight text-white mb-6 text-balance">
+      {{ section.settings.heading }}
+    </h2>
+
+    <p class="text-base sm:text-lg text-[#FAF8F5]/80 max-w-xl mx-auto font-light leading-relaxed mb-10 text-balance">
+      {{ section.settings.subtext }}
+    </p>
+
+    <div class="flex flex-col sm:flex-row items-center gap-4">
+      <a
+        href="#collection"
+        class="w-full sm:w-auto px-9 py-4 bg-[#FAF8F5] hover:bg-white text-[#24211E] text-xs uppercase tracking-widest font-semibold rounded-full transition-all duration-200 shadow-lg flex items-center justify-center gap-2 group"
+      >
+        <span>Shop Wolko</span>
+        <span class="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform">&#8599;</span>
+      </a>
+
+      <a
+        href="mailto:{{ settings.studio_email | default: 'connectwithwolko@gmail.com' }}"
+        class="w-full sm:w-auto px-8 py-4 border border-white/30 hover:border-white text-white text-xs uppercase tracking-widest font-medium rounded-full transition-all text-center"
+      >
+        Custom Inquiries
+      </a>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Final Cinematic CTA",
+  "settings": [
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker",
+      "default": "Heirloom Wool Objects"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Find something made for you."
+    },
+    {
+      "type": "textarea",
+      "id": "subtext",
+      "label": "Subtitle",
+      "default": "Custom color combinations, bridal gifting boxes, or an everyday companion piece for your favorite coat. We hand-weave each piece upon order."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Final Cinematic CTA"
+    }
+  ]
+}
+{% endschema %}

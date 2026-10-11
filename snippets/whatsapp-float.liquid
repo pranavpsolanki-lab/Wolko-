@@ -1,0 +1,22 @@
+{%- if settings.enable_whatsapp_float -%}
+  {%- assign wa_number = settings.whatsapp_primary | default: '918237323043' -%}
+  <a
+    href="https://wa.me/{{ wa_number }}?text=Hi%20Wolko!%20I%20have%20an%20inquiry%20about%20your%20handcrafted%20crochet%20collection."
+    target="_blank"
+    rel="noopener noreferrer"
+    class="fixed bottom-6 right-6 z-40 flex items-center gap-2.5 px-4 py-3 rounded-full bg-[#25D366] hover:bg-[#20BA5A] text-white shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95 group"
+    title="Chat with Wolko on WhatsApp (+{{ wa_number }})"
+    aria-label="WhatsApp Support (+{{ wa_number }})"
+  >
+    <div class="relative">
+      <svg class="w-5 h-5 fill-white" viewBox="0 0 24 24">
+        <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>
+      </svg>
+      <span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-400 rounded-full border border-[#25D366] animate-ping"></span>
+      <span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-400 rounded-full border border-[#25D366]"></span>
+    </div>
+    <span class="hidden sm:inline font-sans text-xs font-semibold tracking-wide">
+      Order on WhatsApp
+    </span>
+  </a>
+{%- endif -%}

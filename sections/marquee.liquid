@@ -1,0 +1,36 @@
+{%- if section.settings.show_marquee -%}
+  <div class="py-6 bg-[#24211E] text-[#FAF8F5] overflow-hidden border-y border-[#3A3530] select-none">
+    <div class="animate-marquee flex items-center gap-10">
+      {%- assign items = "HANDMADE IN SMALL BATCHES|100% PURE MERINO WOOL|ETHICAL ARTISAN COMMERCE|PLASTIC-FREE SEEDED PACKAGING|SLOW-MADE TO STAY|WOLKO STUDIO INDIA|WOVEN BY HAND WITH CARE|HEIRLOOM CRAFTSMANSHIP" | split: "|" -%}
+      {%- for pass in (1..2) -%}
+        {%- for text in items -%}
+          <div class="flex items-center gap-10 shrink-0">
+            <span class="font-editorial text-sm sm:text-base tracking-[0.22em] uppercase font-light text-[#EAE2D8]">
+              {{ text }}
+            </span>
+            <span class="text-[#C87D65] text-xs font-serif" aria-hidden="true">✦</span>
+          </div>
+        {%- endfor -%}
+      {%- endfor -%}
+    </div>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Editorial Marquee",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_marquee",
+      "label": "Show Infinite Marquee",
+      "default": true
+    }
+  ],
+  "presets": [
+    {
+      "name": "Editorial Marquee"
+    }
+  ]
+}
+{% endschema %}

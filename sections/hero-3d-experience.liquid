@@ -1,0 +1,171 @@
+<section id="hero-3d-experience" class="relative py-20 sm:py-28 bg-[#1C1A18] text-[#FAF8F5] border-b border-[#2E2A27] overflow-hidden">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center max-w-3xl mx-auto mb-14">
+      <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 border border-white/15 text-[#E8B4B8] text-[11px] uppercase tracking-[0.25em] mb-4">
+        <span>✦ Interactive 3D Spatial Gallery</span>
+      </div>
+      <h2 class="font-editorial text-4xl sm:text-6xl lg:text-7xl font-normal tracking-wider uppercase text-white mb-4">
+        {{ section.settings.headline }}
+      </h2>
+      <p class="text-sm sm:text-base text-[#A89E96] font-light max-w-xl mx-auto">
+        {{ section.settings.tagline }}
+      </p>
+    </div>
+
+    <!-- 4 Spatial 3D Perspective Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8" style="perspective: 1200px;">
+      <!-- Item 1 -->
+      <div
+        data-open-product-id="tulip-botanical-charm"
+        class="wolko-3d-card group cursor-pointer relative rounded-2xl overflow-hidden bg-[#24211E] border border-white/15 hover:border-[#C87D65] transition-all duration-500 hover:-translate-y-2 shadow-2xl"
+      >
+        <div class="aspect-[4/5] overflow-hidden relative">
+          <img
+            src="{{ 'tulip_charm_1790504950604.jpg' | asset_url }}"
+            alt="Pastel Petal Tulip Bag Charm"
+            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+            loading="lazy"
+            width="600"
+            height="750"
+          >
+          <div class="absolute inset-0 bg-gradient-to-t from-[#1C1A18] via-transparent to-transparent"></div>
+          <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-xs text-[10px] uppercase tracking-wider text-[#E8B4B8] border border-white/15">
+            Limited Run
+          </span>
+          <span class="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-[#FAF8F5] text-[#24211E] font-mono text-xs font-semibold">
+            ₹850
+          </span>
+        </div>
+        <div class="p-5">
+          <h3 class="font-editorial text-xl text-white mb-1 group-hover:text-[#E8B4B8] transition-colors">
+            Pastel Petal Tulip Bag Charm
+          </h3>
+          <p class="text-xs text-[#A89E96] font-light">
+            Hand-knitted blossom with brass swivel clip
+          </p>
+        </div>
+      </div>
+
+      <!-- Item 2 -->
+      <div
+        data-open-product-id="heritage-cable-laptop-sleeve"
+        class="wolko-3d-card group cursor-pointer relative rounded-2xl overflow-hidden bg-[#24211E] border border-white/15 hover:border-[#C87D65] transition-all duration-500 hover:-translate-y-2 shadow-2xl"
+      >
+        <div class="aspect-[4/5] overflow-hidden relative">
+          <img
+            src="{{ 'knit_laptop_sleeve_1790504937311.jpg' | asset_url }}"
+            alt="Heritage Felt & Cable Laptop Sleeve"
+            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+            loading="lazy"
+            width="600"
+            height="750"
+          >
+          <div class="absolute inset-0 bg-gradient-to-t from-[#1C1A18] via-transparent to-transparent"></div>
+          <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-xs text-[10px] uppercase tracking-wider text-[#E8B4B8] border border-white/15">
+            Everyday Cozy
+          </span>
+          <span class="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-[#FAF8F5] text-[#24211E] font-mono text-xs font-semibold">
+            ₹2,450
+          </span>
+        </div>
+        <div class="p-5">
+          <h3 class="font-editorial text-xl text-white mb-1 group-hover:text-[#E8B4B8] transition-colors">
+            Heritage Felt &amp; Cable Laptop Sleeve
+          </h3>
+          <p class="text-xs text-[#A89E96] font-light">
+            4mm organic pressed wool with wood toggle
+          </p>
+        </div>
+      </div>
+
+      <!-- Item 3 -->
+      <div
+        data-open-product-id="wild-buttercup-coin-purse"
+        class="wolko-3d-card group cursor-pointer relative rounded-2xl overflow-hidden bg-[#24211E] border border-white/15 hover:border-[#C87D65] transition-all duration-500 hover:-translate-y-2 shadow-2xl"
+      >
+        <div class="aspect-[4/5] overflow-hidden relative">
+          <img
+            src="{{ 'coin_purse_1790504982557.jpg' | asset_url }}"
+            alt="Wild Buttercup Round Coin Pouch"
+            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+            loading="lazy"
+            width="600"
+            height="750"
+          >
+          <div class="absolute inset-0 bg-gradient-to-t from-[#1C1A18] via-transparent to-transparent"></div>
+          <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-xs text-[10px] uppercase tracking-wider text-[#E8B4B8] border border-white/15">
+            Hand-Stitched
+          </span>
+          <span class="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-[#FAF8F5] text-[#24211E] font-mono text-xs font-semibold">
+            ₹1,150
+          </span>
+        </div>
+        <div class="p-5">
+          <h3 class="font-editorial text-xl text-white mb-1 group-hover:text-[#E8B4B8] transition-colors">
+            Wild Buttercup Round Coin Pouch
+          </h3>
+          <p class="text-xs text-[#A89E96] font-light">
+            Embroidered merino felt with antique zipper
+          </p>
+        </div>
+      </div>
+
+      <!-- Item 4 -->
+      <div
+        data-open-product-id="artisan-blossom-trio-gift-box"
+        class="wolko-3d-card group cursor-pointer relative rounded-2xl overflow-hidden bg-[#24211E] border border-white/15 hover:border-[#C87D65] transition-all duration-500 hover:-translate-y-2 shadow-2xl"
+      >
+        <div class="aspect-[4/5] overflow-hidden relative">
+          <img
+            src="{{ 'gift_box_trio_1790504996112.jpg' | asset_url }}"
+            alt="The Botanical Charm Gift Trio"
+            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+            loading="lazy"
+            width="600"
+            height="750"
+          >
+          <div class="absolute inset-0 bg-gradient-to-t from-[#1C1A18] via-transparent to-transparent"></div>
+          <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-xs text-[10px] uppercase tracking-wider text-[#E8B4B8] border border-white/15">
+            Gift Ready
+          </span>
+          <span class="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-[#FAF8F5] text-[#24211E] font-mono text-xs font-semibold">
+            ₹2,150
+          </span>
+        </div>
+        <div class="p-5">
+          <h3 class="font-editorial text-xl text-white mb-1 group-hover:text-[#E8B4B8] transition-colors">
+            The Botanical Charm Gift Trio
+          </h3>
+          <p class="text-xs text-[#A89E96] font-light">
+            Packaged in seeded plantable cotton box
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "3D Spatial Experience",
+  "settings": [
+    {
+      "type": "text",
+      "id": "headline",
+      "label": "Headline",
+      "default": "WOVEN BY HAND"
+    },
+    {
+      "type": "text",
+      "id": "tagline",
+      "label": "Tagline",
+      "default": "A 3D spatial celebration of slow craft, human patience & tactile merino wool"
+    }
+  ],
+  "presets": [
+    {
+      "name": "3D Spatial Experience"
+    }
+  ]
+}
+{% endschema %}
