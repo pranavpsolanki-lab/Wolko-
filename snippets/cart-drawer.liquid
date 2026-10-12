@@ -91,21 +91,14 @@
         </div>
 
         <div class="grid grid-cols-1 gap-2.5 pt-1">
-          <a
-            href="/checkout"
+          <button
+            type="button"
             id="wolko-shopify-checkout-btn"
-            class="w-full py-3.5 px-6 bg-[#24211E] hover:bg-[#3A3530] text-[#FAF8F5] text-xs uppercase tracking-widest font-semibold rounded-full transition-all duration-200 shadow-md flex items-center justify-center gap-2 text-center"
+            data-open-checkout-modal
+            class="w-full py-3.5 px-6 bg-[#24211E] hover:bg-[#3A3530] text-[#FAF8F5] text-xs uppercase tracking-widest font-semibold rounded-full transition-all duration-200 shadow-md flex items-center justify-center gap-2 text-center cursor-pointer"
           >
             <span>{{ 'templates.cart.checkout' | t }}</span>
             <span>&rarr;</span>
-          </a>
-
-          <button
-            type="button"
-            id="wolko-whatsapp-checkout-btn"
-            class="w-full py-2.5 px-4 bg-[#25D366]/15 hover:bg-[#25D366] text-[#128C7E] hover:text-white border border-[#25D366]/40 text-xs font-semibold rounded-full transition-all flex items-center justify-center gap-2"
-          >
-            <span>Order &amp; Confirm via WhatsApp</span>
           </button>
         </div>
 
@@ -120,3 +113,6 @@
     </div>
   </div>
 </div>
+
+<!-- Wolko 2-Step Google Sign-Up + Customer Address & WhatsApp 8591542015 Checkout Modal -->
+<div id="wolko-checkout-modal" class="fixed inset-0 z-50 overflow-y-auto hidden" aria-hidden="true" role="dialog" aria-modal="true"></div>

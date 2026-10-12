@@ -4,437 +4,502 @@ import {
   CheckCircle2,
   ArrowRight,
   Truck,
-  MessageCircle,
-  Copy,
-  Check,
-  ExternalLink,
-  PhoneCall,
   UserCheck,
   AlertCircle,
   Loader2,
-  LogOut,
   Mail,
+  MapPin,
+  Phone,
+  ShieldCheck,
+  CreditCard,
+  Banknote,
+  Package,
+  Calendar,
 } from 'lucide-react';
-import { useShop, CartItem } from '../context/ShopContext';
-import { BRAND_ASSETS } from '../data/products';
-import { saveOrderToBackend, SheetOrderRow } from '../lib/googleSheets';
+import { useShop } from '../context/ShopContext';
+import { UserAvatar } from './UserAvatar';
+import {
+  saveOrderToBackend,
+  getSavedGoogleUser,
+  getSavedCustomerAddressProfile,
+  syncCustomerAddressProfileFromFirestore,
+  computeOrderTrackingDetails,
+  SheetOrderRow,
+  STORE_WHATSAPP_NUMBER,
+} from '../lib/googleSheets';
+
+const STUDIO_UPI_ID = 'wolkohandcrafted@upi';
 
 export const CheckoutModal: React.FC = () => {
   const {
-    isCheckoutOpen,
-    setIsCheckoutOpen,
     cart,
     cartSubtotal,
+    isCheckoutOpen,
+    setIsCheckoutOpen,
     clearCart,
     googleUser,
-    needsGoogleAuth,
     isSigningInGoogle,
+    handleGooglePopupSignIn,
     handleGoogleLogin,
-    handleGoogleLogout,
     addScheduledOrder,
+    openCustomerDashboard,
   } = useShop();
 
-  const [step, setStep] = useState<'google-auth' | 'details-form' | 'confirmed'>(
-    'google-auth'
-  );
-  const [showGoogleAccountInput, setShowGoogleAccountInput] =
-    useState<boolean>(false);
-  const [googleSignupEmail, setGoogleSignupEmail] = useState<string>('');
-  const [googleSignupName, setGoogleSignupName] = useState<string>('');
-
-  const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    phone: '+91 ',
-    address: '402, Gardenia Residency, 12th Main, Indiranagar',
-    city: 'Bengaluru',
-    state: 'Karnataka',
-    pincode: '560038',
-    paymentMethod: 'upi',
-    deliveryNotes: 'Please ring bell upon delivery',
-  });
-
+  const [step, setStep] = useState<
+    'google-auth' | 'details-form' | 'confirmed'
+  >('google-auth');
   const [orderNumber, setOrderNumber] = useState('');
-  const [placedCartSnapshot, setPlacedCartSnapshot] = useState<CartItem[]>([]);
-  const [placedGrandTotal, setPlacedGrandTotal] = useState<number>(0);
-  const [whatsappMessage, setWhatsappMessage] = useState<string>('');
-  const [isCopied, setIsCopied] = useState<boolean>(false);
-  const [isPlacingOrder, setIsPlacingOrder] = useState<boolean>(false);
-  const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const [placedOrderSnapshot, setPlacedOrderSnapshot] =
+    useState<SheetOrderRow | null>(null);
 
-  // Sync step & prefill user info when Google user signs in
+  // Instant Google Sign-In Fallback inputs (if popup is blocked in iframe)
+  const [showEmailFallback, setShowEmailFallback] = useState(false);
+  const [googleEmailInput, setGoogleEmailInput] = useState('');
+  const [googleNameInput, setGoogleNameInput] = useState('');
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  // Customer Details & Complete Address Form State
+  const [fullName, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [address, setAddress] = useState('');
+  const [landmark, setLandmark] = useState('');
+  const [city, setCity] = useState('');
+  const [state, setState] = useState('');
+  const [pincode, setPincode] = useState('');
+  const [deliveryNotes, setDeliveryNotes] = useState('');
+  const [paymentMode, setPaymentMode] = useState<'COD' | 'UPI'>('COD');
+
+  const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
+
+  // Pre-fill customer details from saved profile + Google user
   useEffect(() => {
-    if (!needsGoogleAuth && googleUser) {
-      setFormData((prev) => ({
-        ...prev,
-        fullName: prev.fullName || googleUser.displayName || '',
-        email: googleUser.email || prev.email || '',
-      }));
-      if (step === 'google-auth') {
-        setStep('details-form');
+    const activeUser = googleUser || getSavedGoogleUser();
+    const savedProfile = getSavedCustomerAddressProfile();
+
+    if (savedProfile) {
+      if (savedProfile.customerName) setFullName(savedProfile.customerName);
+      if (savedProfile.phone) setPhone(savedProfile.phone);
+      if (savedProfile.email) setEmail(savedProfile.email);
+      if (savedProfile.address) setAddress(savedProfile.address);
+      if (savedProfile.landmark) setLandmark(savedProfile.landmark);
+      if (savedProfile.city) setCity(savedProfile.city);
+      if (savedProfile.state) setState(savedProfile.state);
+      if (savedProfile.pincode) setPincode(savedProfile.pincode);
+      if (savedProfile.deliveryNotes)
+        setDeliveryNotes(savedProfile.deliveryNotes);
+    }
+
+    if (activeUser) {
+      if (activeUser.displayName && !fullName) {
+        setFullName(activeUser.displayName);
       }
-    } else if (needsGoogleAuth && step !== 'confirmed') {
+      if (activeUser.email && !email) {
+        setEmail(activeUser.email);
+      }
+    }
+  }, [googleUser]);
+
+  // Whenever Checkout Modal opens, skip Google Sign-Up if user is already signed in
+  useEffect(() => {
+    if (!isCheckoutOpen) return;
+
+    const activeUser = googleUser || getSavedGoogleUser();
+    if (activeUser && activeUser.email) {
+      setStep('details-form');
+      if (activeUser.displayName && !fullName) {
+        setFullName(activeUser.displayName);
+      }
+      if (activeUser.email && !email) {
+        setEmail(activeUser.email);
+      }
+      // Also pull latest saved address from Firestore in background
+      syncCustomerAddressProfileFromFirestore()
+        .then((remoteProfile) => {
+          if (remoteProfile) {
+            setFullName((prev) => prev || remoteProfile.customerName || '');
+            setPhone((prev) => prev || remoteProfile.phone || '');
+            setEmail((prev) => prev || remoteProfile.email || '');
+            setAddress((prev) => prev || remoteProfile.address || '');
+            setLandmark((prev) => prev || remoteProfile.landmark || '');
+            setCity((prev) => prev || remoteProfile.city || '');
+            setState((prev) => prev || remoteProfile.state || '');
+            setPincode((prev) => prev || remoteProfile.pincode || '');
+          }
+        })
+        .catch(() => {});
+    } else {
       setStep('google-auth');
     }
-  }, [needsGoogleAuth, googleUser, step]);
+  }, [isCheckoutOpen, googleUser]);
 
   if (!isCheckoutOpen) return null;
 
   const shippingCost = cartSubtotal >= 1999 ? 0 : 150;
-  const currentGrandTotal = cartSubtotal + shippingCost;
+  const grandTotal = cartSubtotal + shippingCost;
 
-  const handleGoogleAccountContinue = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    setCheckoutError(null);
+  const buildOrderSummaryText = () => {
+    return cart
+      .map(
+        (item) =>
+          `${item.product.name} (${item.selectedColor}${
+            item.selectedSize ? `, ${item.selectedSize}` : ''
+          }) x${item.quantity}`
+      )
+      .join(' | ');
+  };
 
-    if (!showGoogleAccountInput) {
-      setShowGoogleAccountInput(true);
-      return;
-    }
+  const buildAutomatedWhatsAppMessage = (orderIdStr: string) => {
+    const itemLines = cart.map(
+      (item, idx) =>
+        `${idx + 1}. *${item.product.name}* (${item.selectedColor}${
+          item.selectedSize ? `, Size: ${item.selectedSize}` : ''
+        }) × ${item.quantity} = *₹${(
+          item.product.price * item.quantity
+        ).toLocaleString('en-IN')}*`
+    );
 
-    const emailToUse = googleSignupEmail.trim();
-    if (!emailToUse || !emailToUse.includes('@')) {
-      setCheckoutError('Please enter your Google email address (e.g. yourname@gmail.com).');
-      return;
-    }
+    const fullAddr = [
+      address.trim(),
+      landmark.trim() ? `Landmark: ${landmark.trim()}` : '',
+      `${city.trim()}, ${state.trim()} - ${pincode.trim()}`,
+    ]
+      .filter(Boolean)
+      .join(', ');
 
+    return [
+      `✨ *NEW WOLKO ORDER PLACED* ✨`,
+      `🆔 *Order ID:* ${orderIdStr}`,
+      `📅 *Date:* ${new Date().toLocaleString('en-IN')}`,
+      ``,
+      `👤 *Customer Details:*`,
+      `• *Name:* ${fullName.trim()}`,
+      `• *Phone / WhatsApp:* ${phone.trim()}`,
+      `• *Google Email:* ${email.trim() || googleUser?.email || 'N/A'}`,
+      ``,
+      `📍 *Complete Delivery Address:*`,
+      `• *Street / House:* ${address.trim()}`,
+      landmark.trim() ? `• *Landmark:* ${landmark.trim()}` : null,
+      `• *City / State:* ${city.trim()}, ${state.trim()}`,
+      `• *Pincode:* ${pincode.trim()}`,
+      deliveryNotes.trim() ? `• *Delivery Note:* ${deliveryNotes.trim()}` : null,
+      ``,
+      `🛍️ *Items Ordered:*`,
+      ...itemLines,
+      ``,
+      `🚚 *Shipping:* ${
+        shippingCost === 0 ? 'FREE Express Shipping' : `₹${shippingCost}`
+      }`,
+      `💰 *Total Amount:* *₹${grandTotal.toLocaleString('en-IN')}*`,
+      `💳 *Payment Method:* *${
+        paymentMode === 'COD'
+          ? 'Cash on Delivery (COD)'
+          : `UPI (${STUDIO_UPI_ID})`
+      }*`,
+      ``,
+      `📦 *Full Address Line:* ${fullAddr}`,
+    ]
+      .filter((line) => line !== null)
+      .join('\n');
+  };
+
+  // Handler 1: Real Firebase Google Sign-In Popup
+  const onFirebaseGoogleSignInClick = async () => {
+    setAuthError(null);
     try {
-      const profile = await handleGoogleLogin(
-        emailToUse,
-        googleSignupName.trim() || undefined
-      );
+      const profile = await handleGooglePopupSignIn();
       if (profile) {
-        setFormData((prev) => ({
-          ...prev,
-          fullName: prev.fullName || profile.displayName || '',
-          email: profile.email || prev.email || '',
-        }));
+        if (profile.displayName) setFullName(profile.displayName);
+        if (profile.email) setEmail(profile.email);
         setStep('details-form');
       }
     } catch (err: unknown) {
-      setCheckoutError(
-        err instanceof Error
-          ? err.message
-          : 'Google Sign-Up failed. Please check your email and try again.'
-      );
+      const msg = err instanceof Error ? err.message : String(err);
+      if (
+        msg.includes('popup-blocked') ||
+        msg.includes('unauthorized-domain') ||
+        msg.includes('operation-not-supported') ||
+        msg.includes('cancelled-popup-request')
+      ) {
+        setShowEmailFallback(true);
+        setAuthError(
+          'Browser popup was restricted in preview mode. Enter your Google email below to continue.'
+        );
+      } else if (msg.includes('popup-closed-by-user')) {
+        setShowEmailFallback(true);
+      } else {
+        setShowEmailFallback(true);
+      }
     }
   };
 
-  const handlePlaceOrderSubmit = async (e: React.FormEvent) => {
+  // Handler 2: Instant Google Account Verification Fallback
+  const onGoogleFallbackSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setCheckoutError(null);
+    setAuthError(null);
 
-    if (!formData.fullName.trim() || !formData.phone.trim()) {
-      setCheckoutError('Please enter both your Full Name and Phone Number.');
+    const cleanEmail = googleEmailInput.trim().toLowerCase();
+    if (!cleanEmail || !cleanEmail.includes('@')) {
+      setAuthError('Please enter a valid Google email address.');
       return;
     }
 
-    setIsPlacingOrder(true);
-
-    const generatedOrderNum = `WOLKO-${Math.floor(
-      10000 + Math.random() * 90000
-    )}`;
-    const itemsSnapshot = [...cart];
-    const itemsSummaryForSheet = itemsSnapshot
-      .map(
-        (item) =>
-          `${item.product.name} (${item.selectedColor || 'Standard'}) x${
-            item.quantity
-          }`
-      )
-      .join(', ');
-
-    const timestampStr = new Date().toLocaleString('en-IN', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-
-    const newOrderRow: SheetOrderRow = {
-      orderId: generatedOrderNum,
-      timestamp: timestampStr,
-      customerName: formData.fullName.trim(),
-      phone: formData.phone.trim(),
-      email: formData.email.trim() || googleUser?.email || '',
-      productsSummary: itemsSummaryForSheet,
-      totalAmount: `${currentGrandTotal}`,
-      paymentMethod: formData.paymentMethod.toUpperCase(),
-      deliveryAddress: `${formData.address}, ${formData.city}, ${formData.state} - ${formData.pincode}`,
-      orderStatus: 'PENDING_CONFIRMATION',
-      aiCallStatus: 'SCHEDULED (5 MIN TIMER)',
-      voiceResponse: 'Waiting for 5-Min AI Voice Call...',
-    };
-
-    try {
-      // Automatically save order in Backend Google Sheets database & schedule 5-min AI Voice Call
-      const savedOrder = await saveOrderToBackend(newOrderRow);
-
-      setOrderNumber(generatedOrderNum);
-      setPlacedCartSnapshot(itemsSnapshot);
-      setPlacedGrandTotal(currentGrandTotal);
-
-      const itemsListText = itemsSnapshot
-        .map(
-          (item, index) =>
-            `${index + 1}. *${item.product.name}*\n   - Color/Variant: ${
-              item.selectedColor || 'Standard'
-            }\n   - Quantity: ${item.quantity} pc(s)\n   - Price: ₹${
-              item.product.price
-            } each (Total: ₹${(
-              item.product.price * item.quantity
-            ).toLocaleString('en-IN')})`
-        )
-        .join('\n\n');
-
-      const orderMsg = `✨ *NEW WOLKO STORE ORDER PLACED* ✨
-🪔 *Order ID:* ${generatedOrderNum}
-📅 *Date:* ${timestampStr}
-
-👤 *Customer Details:*
-• Name: ${formData.fullName}
-• Phone: ${formData.phone}
-• Email: ${formData.email}
-
-📍 *Delivery Address:*
-${formData.address}
-${formData.city}, ${formData.state} - ${formData.pincode}
-
-🛍️ *Products Ordered (${itemsSnapshot.length} item(s)):*
-${itemsListText}
-
-💰 *Total Payable:* *₹${currentGrandTotal.toLocaleString('en-IN')}* (${formData.paymentMethod.toUpperCase()})`;
-
-      setWhatsappMessage(orderMsg);
-
-      // Start the 5-minute background AI Voice Call timer
-      addScheduledOrder(savedOrder);
-
-      setStep('confirmed');
-      clearCart();
-    } catch (err: unknown) {
-      setCheckoutError(
-        err instanceof Error
-          ? err.message
-          : 'Could not place order. Please try again.'
-      );
-    } finally {
-      setIsPlacingOrder(false);
+    const profile = await handleGoogleLogin(
+      cleanEmail,
+      googleNameInput.trim()
+    );
+    if (profile) {
+      if (profile.displayName) setFullName(profile.displayName);
+      if (profile.email) setEmail(profile.email);
+      setStep('details-form');
+    } else {
+      setAuthError('Could not sign in. Please check your email and try again.');
     }
   };
 
-  const handleCopyOrder = () => {
-    if (whatsappMessage) {
-      navigator.clipboard.writeText(whatsappMessage);
-      setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 2500);
+  // Step 2: Submit Customer Details Form -> Save to Firestore + Automated Backend Dispatch -> Show Compact Thank You Popup
+  const handlePlaceOrderSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isSubmittingOrder) return;
+
+    setIsSubmittingOrder(true);
+    const randomNum = Math.floor(10000 + Math.random() * 90000);
+    const generatedOrderId = `WOLKO-${randomNum}`;
+    setOrderNumber(generatedOrderId);
+
+    const fullDeliveryAddress = [
+      address.trim(),
+      landmark.trim() ? `Near ${landmark.trim()}` : '',
+      `${city.trim()}, ${state.trim()} - ${pincode.trim()}`,
+    ]
+      .filter(Boolean)
+      .join(', ');
+
+    const nowMs = Date.now();
+    const deliveryDateFormatted = new Date(
+      nowMs + 4 * 24 * 60 * 60 * 1000
+    ).toLocaleDateString('en-IN', {
+      weekday: 'short',
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    });
+
+    const waMessageText = buildAutomatedWhatsAppMessage(generatedOrderId);
+
+    const newOrderRow: SheetOrderRow = {
+      orderId: generatedOrderId,
+      userId: googleUser?.uid || '',
+      timestamp: new Date().toLocaleString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+      customerName: fullName.trim(),
+      phone: phone.trim(),
+      email: email.trim() || googleUser?.email || '',
+      address: address.trim(),
+      landmark: landmark.trim(),
+      city: city.trim(),
+      state: state.trim(),
+      pincode: pincode.trim(),
+      deliveryNotes: deliveryNotes.trim(),
+      productsSummary: buildOrderSummaryText(),
+      totalAmount: String(grandTotal),
+      paymentMethod: paymentMode,
+      deliveryAddress: fullDeliveryAddress,
+      whatsappSentTo: STORE_WHATSAPP_NUMBER,
+      orderStatus: 'CONFIRMED ✅',
+      aiCallStatus: 'AUTO-DISPATCHED TO WHATSAPP 8591542015',
+      voiceResponse:
+        'Order details automatically forwarded to studio WhatsApp.',
+      createdAtMs: nowMs,
+      scheduledCallAtMs: nowMs + 300 * 1000,
+      callCompleted: false,
+      estimatedDeliveryDate: deliveryDateFormatted,
+    };
+
+    try {
+      const savedOrder = await saveOrderToBackend(newOrderRow, waMessageText);
+      addScheduledOrder(savedOrder);
+      setPlacedOrderSnapshot(savedOrder);
+    } catch {
+      addScheduledOrder(newOrderRow);
+      setPlacedOrderSnapshot(newOrderRow);
+    } finally {
+      setIsSubmittingOrder(false);
+      setStep('confirmed');
+      clearCart();
     }
   };
 
   const handleClose = () => {
     setIsCheckoutOpen(false);
-    setCheckoutError(null);
-    setShowGoogleAccountInput(false);
-    setStep(needsGoogleAuth ? 'google-auth' : 'details-form');
+    setTimeout(() => {
+      const activeUser = googleUser || getSavedGoogleUser();
+      setStep(activeUser ? 'details-form' : 'google-auth');
+    }, 250);
   };
 
-  const primaryWhatsappUrl = `https://wa.me/918237323043?text=${encodeURIComponent(
-    whatsappMessage
-  )}`;
-  const secondaryWhatsappUrl = `https://wa.me/918591542015?text=${encodeURIComponent(
-    whatsappMessage
-  )}`;
+  const handleOpenDashboardFromThankYou = () => {
+    setIsCheckoutOpen(false);
+    openCustomerDashboard('orders');
+  };
+
+  const trackingInfo = placedOrderSnapshot
+    ? computeOrderTrackingDetails(placedOrderSnapshot)
+    : null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
+    <div
+      className="fixed inset-0 z-50 overflow-y-auto"
+      role="dialog"
+      aria-modal="true"
+    >
+      {/* Backdrop */}
       <div
         onClick={handleClose}
-        className="fixed inset-0 bg-[#24211E]/60 backdrop-blur-xs transition-opacity duration-300"
+        className="fixed inset-0 bg-[#24211E]/60 backdrop-blur-xs transition-opacity"
       />
 
-      <div className="min-h-full flex items-center justify-center p-4 sm:p-6 lg:p-8">
-        <div className="relative w-full max-w-2xl bg-[#FAF8F5] rounded-2xl shadow-2xl border border-[#EAE2D8] overflow-hidden flex flex-col my-8">
+      <div className="min-h-full flex items-center justify-center p-4 sm:p-6">
+        <div className="relative w-full max-w-xl bg-[#FAF8F5] rounded-2xl shadow-2xl border border-[#EAE2D8] overflow-hidden flex flex-col my-6">
           {/* Header */}
-          <div className="px-6 py-5 border-b border-[#EAE2D8] bg-white flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full overflow-hidden border border-[#EAE2D8]">
-                <img
-                  src={BRAND_ASSETS.logo}
-                  alt="Wolko Logo"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div>
-                <h3 className="font-editorial text-lg font-semibold text-[#24211E] uppercase tracking-wider">
-                  Wolko Express Checkout
-                </h3>
-                <p className="text-[10px] text-[#8C827A] uppercase tracking-wider">
-                  Handcrafted Studio · Secure Order Checkout
-                </p>
-              </div>
+          <div className="px-6 py-4 border-b border-[#EAE2D8] bg-white flex items-center justify-between">
+            <div>
+              <h3 className="font-editorial text-lg sm:text-xl font-semibold text-[#24211E] tracking-tight">
+                {step === 'confirmed'
+                  ? 'Order Confirmed'
+                  : 'Wolko Express Checkout'}
+              </h3>
+              <p className="text-xs text-[#8C827A]">
+                {step === 'google-auth' &&
+                  'Sign in once with Google to continue'}
+                {step === 'details-form' &&
+                  'Enter your delivery address to complete your order'}
+                {step === 'confirmed' &&
+                  `Thank you for shopping with Wolko Handcrafted`}
+              </p>
             </div>
             <button
               onClick={handleClose}
-              className="p-1.5 text-[#8C827A] hover:text-[#24211E] rounded-full hover:bg-[#F5EFEB]"
+              className="p-1.5 text-[#8C827A] hover:text-[#24211E] rounded-full hover:bg-[#F5EFEB] transition-colors"
+              aria-label="Close checkout"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
-          {/* Stepper Progress */}
-          {step !== 'confirmed' && (
-            <div className="px-6 py-3 bg-[#F5EFEB] border-b border-[#EAE2D8] flex items-center justify-center gap-6 text-xs font-medium">
-              <span
-                className={`flex items-center gap-1.5 ${
-                  step === 'google-auth'
-                    ? 'text-[#24211E] font-semibold'
-                    : 'text-emerald-700'
-                }`}
-              >
-                <span
-                  className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-mono ${
-                    step === 'google-auth'
-                      ? 'bg-[#24211E] text-white'
-                      : 'bg-emerald-600 text-white'
-                  }`}
-                >
-                  {step === 'google-auth' ? '1' : '✓'}
-                </span>
-                <span>1. Sign up with Google</span>
-              </span>
-
-              <span className="text-[#D9CFC4]">——</span>
-
-              <span
-                className={`flex items-center gap-1.5 ${
-                  step === 'details-form'
-                    ? 'text-[#24211E] font-semibold'
-                    : 'text-[#8C827A]'
-                }`}
-              >
-                <span
-                  className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-mono ${
-                    step === 'details-form'
-                      ? 'bg-[#24211E] text-white'
-                      : 'bg-[#D9CFC4] text-[#6B6158]'
-                  }`}
-                >
-                  2
-                </span>
-                <span>2. Name, Phone & Delivery Details</span>
-              </span>
-            </div>
-          )}
-
-          {/* Content Body */}
-          <div className="p-6 sm:p-8 overflow-y-auto max-h-[78vh]">
-            {checkoutError && (
-              <div className="mb-5 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2.5">
-                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-                <div className="flex-1">{checkoutError}</div>
-              </div>
-            )}
-
-            {/* STEP 1: SIGN UP WITH GOOGLE */}
+          <div className="p-6 sm:p-7 overflow-y-auto max-h-[82vh]">
+            {/* =================================================================
+                STEP 1: GOOGLE SIGN-IN (Only shown if user has NEVER signed in)
+               ================================================================= */}
             {step === 'google-auth' && (
-              <div className="py-6 text-center max-w-md mx-auto space-y-6">
-                <div className="w-16 h-16 rounded-2xl bg-white border border-[#EAE2D8] shadow-sm mx-auto flex items-center justify-center">
-                  <UserCheck className="w-8 h-8 text-[#C87D65]" />
+              <div className="py-4 text-center max-w-md mx-auto space-y-5">
+                <div className="w-12 h-12 rounded-2xl bg-white border border-[#EAE2D8] shadow-xs flex items-center justify-center mx-auto">
+                  <svg className="w-6 h-6" viewBox="0 0 24 24">
+                    <path
+                      fill="#4285F4"
+                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                    />
+                    <path
+                      fill="#34A853"
+                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                    />
+                    <path
+                      fill="#FBBC05"
+                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                    />
+                    <path
+                      fill="#EA4335"
+                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                    />
+                  </svg>
                 </div>
 
-                <div>
-                  <h4 className="font-editorial text-2xl sm:text-3xl text-[#24211E] font-medium">
-                    Sign Up with Google to Order
+                <div className="space-y-1.5">
+                  <h4 className="font-editorial text-2xl text-[#24211E] font-medium">
+                    Continue with Google
                   </h4>
-                  <p className="text-xs text-[#6B6158] font-light mt-2 leading-relaxed">
-                    Sign in with your Google account to proceed to the customer
-                    details form and complete your order.
+                  <p className="text-xs text-[#6B6158] leading-relaxed">
+                    Sign in once with your Google account to save your delivery
+                    address and track your live order status anytime in your
+                    Personal Dashboard.
                   </p>
                 </div>
 
-                {!showGoogleAccountInput ? (
-                  <div className="pt-2 flex flex-col items-center gap-3">
+                {/* Order Preview */}
+                <div className="p-3.5 rounded-xl bg-white border border-[#EAE2D8] text-left flex items-center justify-between">
+                  <div>
+                    <div className="text-[11px] text-[#8C827A]">
+                      Order Total ({cart.reduce((a, b) => a + b.quantity, 0)}{' '}
+                      items)
+                    </div>
+                    <div className="text-xs font-medium text-[#24211E] truncate max-w-[230px]">
+                      {cart.map((c) => c.product.name).join(', ')}
+                    </div>
+                  </div>
+                  <div className="font-mono text-base font-bold text-[#24211E] tabular-nums">
+                    ₹{grandTotal.toLocaleString('en-IN')}
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <button
+                    type="button"
+                    onClick={onFirebaseGoogleSignInClick}
+                    disabled={isSigningInGoogle}
+                    className="w-full py-3.5 px-5 rounded-xl bg-white hover:bg-[#F5EFEB] text-[#24211E] border-2 border-[#24211E] text-xs font-semibold transition-all flex items-center justify-center gap-3 shadow-sm cursor-pointer disabled:opacity-60"
+                  >
+                    {isSigningInGoogle ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin text-[#C87D65]" />
+                        <span>Signing in with Google...</span>
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                          <path
+                            fill="#4285F4"
+                            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                          />
+                          <path
+                            fill="#34A853"
+                            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                          />
+                          <path
+                            fill="#FBBC05"
+                            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                          />
+                          <path
+                            fill="#EA4335"
+                            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                          />
+                        </svg>
+                        <span>Sign Up / Continue with Google</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </>
+                    )}
+                  </button>
+
+                  {!showEmailFallback && (
                     <button
                       type="button"
-                      onClick={() => setShowGoogleAccountInput(true)}
-                      disabled={isSigningInGoogle}
-                      className="gsi-material-button"
+                      onClick={() => setShowEmailFallback(true)}
+                      className="text-[11px] text-[#6B6158] hover:text-[#24211E] underline cursor-pointer"
                     >
-                      <div className="gsi-material-button-state"></div>
-                      <div className="gsi-material-button-content-wrapper">
-                        <div className="gsi-material-button-icon">
-                          <svg
-                            version="1.1"
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 48 48"
-                            style={{ display: 'block' }}
-                          >
-                            <path
-                              fill="#EA4335"
-                              d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
-                            ></path>
-                            <path
-                              fill="#4285F4"
-                              d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"
-                            ></path>
-                            <path
-                              fill="#FBBC05"
-                              d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"
-                            ></path>
-                            <path
-                              fill="#34A853"
-                              d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
-                            ></path>
-                          </svg>
-                        </div>
-                        <span className="gsi-material-button-contents">
-                          Sign in with Google
-                        </span>
-                      </div>
+                      Or enter your Google email directly
                     </button>
-                    <span className="text-[11px] text-[#8C827A]">
-                      Fast, secure customer verification for order updates
-                    </span>
-                  </div>
-                ) : (
-                  <form
-                    onSubmit={handleGoogleAccountContinue}
-                    className="p-5 rounded-2xl bg-white border border-[#EAE2D8] shadow-md text-left space-y-4 animate-in fade-in zoom-in-95"
-                  >
-                    <div className="flex items-center gap-2.5 pb-2 border-b border-[#F0EBE4]">
-                      <svg
-                        className="w-5 h-5 shrink-0"
-                        viewBox="0 0 48 48"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          fill="#EA4335"
-                          d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
-                        />
-                        <path
-                          fill="#4285F4"
-                          d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"
-                        />
-                        <path
-                          fill="#FBBC05"
-                          d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"
-                        />
-                        <path
-                          fill="#34A853"
-                          d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
-                        />
-                      </svg>
-                      <div>
-                        <div className="text-xs font-semibold text-[#24211E]">
-                          Continue with Google Account
-                        </div>
-                        <div className="text-[10px] text-[#8C827A]">
-                          Enter your Google email to link your order
-                        </div>
-                      </div>
-                    </div>
+                  )}
+                </div>
 
+                {showEmailFallback && (
+                  <form
+                    onSubmit={onGoogleFallbackSubmit}
+                    className="p-4 rounded-xl bg-white border border-[#EAE2D8] text-left space-y-3"
+                  >
                     <div>
                       <label className="block text-xs font-medium text-[#24211E] mb-1">
                         Google Email Address *
@@ -444,169 +509,157 @@ ${itemsListText}
                         <input
                           type="email"
                           required
-                          autoFocus
+                          value={googleEmailInput}
+                          onChange={(e) => setGoogleEmailInput(e.target.value)}
                           placeholder="yourname@gmail.com"
-                          value={googleSignupEmail}
-                          onChange={(e) => setGoogleSignupEmail(e.target.value)}
-                          className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-[#D9CFC4] bg-[#FAF8F5] text-xs text-[#24211E] focus:outline-none focus:border-[#24211E] focus:bg-white"
+                          className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-[#D9CFC4] bg-[#FAF8F5] text-xs text-[#24211E] focus:outline-none focus:border-[#24211E]"
                         />
                       </div>
                     </div>
 
                     <div>
                       <label className="block text-xs font-medium text-[#24211E] mb-1">
-                        Your Name (Optional — can edit in next step)
+                        Your Name *
                       </label>
                       <input
                         type="text"
-                        placeholder="e.g. Krish Solanki"
-                        value={googleSignupName}
-                        onChange={(e) => setGoogleSignupName(e.target.value)}
-                        className="w-full px-3.5 py-2 rounded-xl border border-[#D9CFC4] bg-[#FAF8F5] text-xs text-[#24211E] focus:outline-none focus:border-[#24211E] focus:bg-white"
+                        required
+                        value={googleNameInput}
+                        onChange={(e) => setGoogleNameInput(e.target.value)}
+                        placeholder="Enter your full name"
+                        className="w-full px-3.5 py-2.5 rounded-lg border border-[#D9CFC4] bg-[#FAF8F5] text-xs text-[#24211E] focus:outline-none focus:border-[#24211E]"
                       />
                     </div>
+
+                    {authError && (
+                      <div className="p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-[11px] text-amber-900 flex items-start gap-2">
+                        <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                        <span>{authError}</span>
+                      </div>
+                    )}
 
                     <button
                       type="submit"
                       disabled={isSigningInGoogle}
-                      className="w-full py-2.5 px-4 rounded-xl bg-[#24211E] hover:bg-[#3A3530] text-white text-xs font-semibold flex items-center justify-center gap-2 shadow-sm transition-all"
+                      className="w-full py-2.5 px-4 rounded-lg bg-[#24211E] hover:bg-[#3A3530] text-white text-xs font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer"
                     >
-                      {isSigningInGoogle ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          <span>Signing in with Google...</span>
-                        </>
-                      ) : (
-                        <>
-                          <span>Continue with Google</span>
-                          <ArrowRight className="w-3.5 h-3.5" />
-                        </>
-                      )}
+                      <span>Continue to Address Form</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
                     </button>
                   </form>
                 )}
               </div>
             )}
 
-            {/* STEP 2: CUSTOMER NAME & PHONE NUMBER FORM + DELIVERY DETAILS */}
+            {/* =================================================================
+                STEP 2: CUSTOMER DETAILS & DELIVERY ADDRESS FORM
+               ================================================================= */}
             {step === 'details-form' && (
               <form onSubmit={handlePlaceOrderSubmit} className="space-y-4">
-                {/* Connected Google Profile Bar */}
+                {/* Connected Google Account Bar (No repeated login prompt) */}
                 {googleUser && (
-                  <div className="p-3 rounded-xl bg-emerald-50/90 border border-emerald-200 flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-bold">
-                        {(googleUser.displayName || googleUser.email || 'G')[0].toUpperCase()}
-                      </div>
-                      <div>
-                        <div className="text-xs font-semibold text-emerald-950 flex items-center gap-1.5">
-                          <span>Signed in with Google</span>
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                        </div>
-                        <div className="text-[11px] text-emerald-700">
-                          {googleUser.email}
-                        </div>
+                  <div className="px-3.5 py-2.5 rounded-xl bg-[#F5EFEB] border border-[#EAE2D8] flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2.5 text-[#24211E] min-w-0">
+                      <UserAvatar
+                        photoURL={googleUser.photoURL}
+                        email={googleUser.email}
+                        name={googleUser.displayName}
+                        sizeClass="w-7 h-7"
+                        textClass="text-xs"
+                        showGoogleBadge={true}
+                      />
+                      <div className="min-w-0 truncate">
+                        <span className="font-medium">
+                          Signed in as {googleUser.displayName || googleUser.email}
+                        </span>
+                        <span className="text-[#8C827A] hidden sm:inline">
+                          {' '}
+                          · {googleUser.email}
+                        </span>
                       </div>
                     </div>
-                    <button
-                      type="button"
-                      onClick={handleGoogleLogout}
-                      className="text-[11px] text-emerald-800 hover:text-rose-700 flex items-center gap-1 px-2.5 py-1 rounded-lg hover:bg-white/60 transition-colors"
-                    >
-                      <LogOut className="w-3 h-3" />
-                      <span>Switch</span>
-                    </button>
+                    <span className="text-[11px] text-[#7B8A78] font-medium flex items-center gap-1 shrink-0">
+                      <UserCheck className="w-3.5 h-3.5" />
+                      <span>Verified</span>
+                    </span>
                   </div>
                 )}
 
-                {/* Customer Name & Phone Number Form */}
-                <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-50/90 via-white to-emerald-50/50 border-2 border-[#C87D65]/40 space-y-3 shadow-2xs">
-                  <div className="flex items-center gap-2">
-                    <PhoneCall className="w-4 h-4 text-[#C87D65]" />
-                    <h4 className="font-editorial text-lg font-semibold text-[#24211E]">
-                      Your Name & Phone Number
-                    </h4>
-                  </div>
-
-                  <p className="text-[11px] text-[#6B6158] leading-relaxed">
-                    Please enter your <strong>Full Name</strong> and active{' '}
-                    <strong>Phone Number</strong> so we can confirm your order on
-                    call before dispatch.
-                  </p>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
-                    <div>
-                      <label className="block text-xs font-semibold text-[#24211E] mb-1">
-                        Full Name (आपका नाम) *
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="e.g. Krish Solanki"
-                        value={formData.fullName}
-                        onChange={(e) =>
-                          setFormData({ ...formData, fullName: e.target.value })
-                        }
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-[#C87D65]/60 bg-white text-[#24211E] text-xs font-medium focus:outline-none focus:border-[#24211E] focus:ring-1 focus:ring-[#24211E]"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-semibold text-[#24211E] mb-1">
-                        Phone Number (फ़ोन नंबर) *
-                      </label>
-                      <input
-                        type="tel"
-                        required
-                        placeholder="e.g. +91 98765 43210"
-                        value={formData.phone}
-                        onChange={(e) =>
-                          setFormData({ ...formData, phone: e.target.value })
-                        }
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-[#C87D65]/60 bg-white text-[#24211E] text-xs font-mono font-medium focus:outline-none focus:border-[#24211E] focus:ring-1 focus:ring-[#24211E]"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Delivery & Payment Details */}
-                <div className="flex items-center justify-between border-b border-[#EAE2D8] pb-2 pt-2">
-                  <h4 className="font-editorial text-lg text-[#24211E] font-medium">
-                    Delivery Address & Payment Mode
-                  </h4>
-                  <span className="text-xs text-[#7B8A78] flex items-center gap-1">
-                    <Truck className="w-3.5 h-3.5" />
-                    <span>Free Shipping on ₹1,999+</span>
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* Customer Name & Phone */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                   <div>
-                    <label className="block text-xs font-medium text-[#574E45] mb-1">
-                      Street Address & Landmark *
+                    <label className="block text-xs font-medium text-[#24211E] mb-1">
+                      Full Name *
                     </label>
                     <input
                       type="text"
                       required
-                      value={formData.address}
-                      onChange={(e) =>
-                        setFormData({ ...formData, address: e.target.value })
-                      }
-                      className="w-full px-3.5 py-2 rounded-xl border border-[#D9CFC4] bg-white text-[#24211E] text-xs focus:outline-none focus:border-[#24211E]"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      placeholder="Enter your full name"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-[#D9CFC4] bg-white text-xs text-[#24211E] focus:outline-none focus:border-[#24211E]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-[#24211E] mb-1">
+                      Phone / WhatsApp Number *
+                    </label>
+                    <div className="relative">
+                      <Phone className="w-3.5 h-3.5 text-[#8C827A] absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="tel"
+                        required
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        placeholder="10-digit mobile number"
+                        className="w-full pl-8 pr-3.5 py-2.5 rounded-xl border border-[#D9CFC4] bg-white text-xs text-[#24211E] font-mono focus:outline-none focus:border-[#24211E]"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Complete Delivery Address */}
+                <div>
+                  <label className="block text-xs font-medium text-[#24211E] mb-1">
+                    Complete Delivery Address (House No., Building, Street) *
+                  </label>
+                  <div className="relative">
+                    <MapPin className="w-3.5 h-3.5 text-[#8C827A] absolute left-3 top-3" />
+                    <input
+                      type="text"
+                      required
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      placeholder="Flat / House No., Building Name, Street, Area"
+                      className="w-full pl-8 pr-3.5 py-2.5 rounded-xl border border-[#D9CFC4] bg-white text-xs text-[#24211E] focus:outline-none focus:border-[#24211E]"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  <div>
+                    <label className="block text-xs font-medium text-[#574E45] mb-1">
+                      Landmark (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      value={landmark}
+                      onChange={(e) => setLandmark(e.target.value)}
+                      placeholder="Near Metro, Park, Temple"
+                      className="w-full px-3.5 py-2 rounded-xl border border-[#D9CFC4] bg-white text-xs text-[#24211E] focus:outline-none focus:border-[#24211E]"
                     />
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-[#574E45] mb-1">
-                      Google Email Address *
+                      Email Address *
                     </label>
                     <input
                       type="email"
                       required
-                      value={formData.email}
-                      onChange={(e) =>
-                        setFormData({ ...formData, email: e.target.value })
-                      }
-                      className="w-full px-3.5 py-2 rounded-xl border border-[#D9CFC4] bg-white text-[#24211E] text-xs focus:outline-none focus:border-[#24211E]"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="yourname@gmail.com"
+                      className="w-full px-3.5 py-2 rounded-xl border border-[#D9CFC4] bg-white text-xs text-[#24211E] focus:outline-none focus:border-[#24211E]"
                     />
                   </div>
                 </div>
@@ -619,14 +672,12 @@ ${itemsListText}
                     <input
                       type="text"
                       required
-                      value={formData.city}
-                      onChange={(e) =>
-                        setFormData({ ...formData, city: e.target.value })
-                      }
-                      className="w-full px-3.5 py-2 rounded-xl border border-[#D9CFC4] bg-white text-[#24211E] text-xs focus:outline-none focus:border-[#24211E]"
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      placeholder="Mumbai"
+                      className="w-full px-3 py-2 rounded-xl border border-[#D9CFC4] bg-white text-xs text-[#24211E] focus:outline-none focus:border-[#24211E]"
                     />
                   </div>
-
                   <div>
                     <label className="block text-xs font-medium text-[#574E45] mb-1">
                       State *
@@ -634,14 +685,12 @@ ${itemsListText}
                     <input
                       type="text"
                       required
-                      value={formData.state}
-                      onChange={(e) =>
-                        setFormData({ ...formData, state: e.target.value })
-                      }
-                      className="w-full px-3.5 py-2 rounded-xl border border-[#D9CFC4] bg-white text-[#24211E] text-xs focus:outline-none focus:border-[#24211E]"
+                      value={state}
+                      onChange={(e) => setState(e.target.value)}
+                      placeholder="Maharashtra"
+                      className="w-full px-3 py-2 rounded-xl border border-[#D9CFC4] bg-white text-xs text-[#24211E] focus:outline-none focus:border-[#24211E]"
                     />
                   </div>
-
                   <div>
                     <label className="block text-xs font-medium text-[#574E45] mb-1">
                       Pincode *
@@ -649,81 +698,132 @@ ${itemsListText}
                     <input
                       type="text"
                       required
-                      value={formData.pincode}
-                      onChange={(e) =>
-                        setFormData({ ...formData, pincode: e.target.value })
-                      }
-                      className="w-full px-3.5 py-2 rounded-xl border border-[#D9CFC4] bg-white text-[#24211E] text-xs focus:outline-none focus:border-[#24211E]"
+                      pattern="[0-9]{6}"
+                      title="6-digit Indian Postal Pincode"
+                      value={pincode}
+                      onChange={(e) => setPincode(e.target.value)}
+                      placeholder="400001"
+                      className="w-full px-3 py-2 rounded-xl border border-[#D9CFC4] bg-white text-xs text-[#24211E] font-mono focus:outline-none focus:border-[#24211E]"
                     />
                   </div>
                 </div>
 
-                {/* Payment Mode */}
-                <div className="grid grid-cols-2 gap-3 pt-1">
-                  <label
-                    className={`p-3 rounded-xl border cursor-pointer flex items-center gap-2 text-xs ${
-                      formData.paymentMethod === 'upi'
-                        ? 'border-[#24211E] bg-white font-semibold'
-                        : 'border-[#EAE2D8] bg-[#FAF8F5]'
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="payment"
-                      value="upi"
-                      checked={formData.paymentMethod === 'upi'}
-                      onChange={() =>
-                        setFormData({ ...formData, paymentMethod: 'upi' })
-                      }
-                      className="accent-[#24211E]"
-                    />
-                    <span>Instant UPI (GPay / PhonePe)</span>
+                {/* Delivery Notes (Optional) */}
+                <div>
+                  <label className="block text-xs font-medium text-[#574E45] mb-1">
+                    Delivery Instructions / Notes (Optional)
                   </label>
-                  <label
-                    className={`p-3 rounded-xl border cursor-pointer flex items-center gap-2 text-xs ${
-                      formData.paymentMethod === 'cod'
-                        ? 'border-[#24211E] bg-white font-semibold'
-                        : 'border-[#EAE2D8] bg-[#FAF8F5]'
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="payment"
-                      value="cod"
-                      checked={formData.paymentMethod === 'cod'}
-                      onChange={() =>
-                        setFormData({ ...formData, paymentMethod: 'cod' })
-                      }
-                      className="accent-[#24211E]"
-                    />
-                    <span>Cash on Delivery (COD)</span>
-                  </label>
+                  <input
+                    type="text"
+                    value={deliveryNotes}
+                    onChange={(e) => setDeliveryNotes(e.target.value)}
+                    placeholder="Gate code, preferred delivery time, or gift note"
+                    className="w-full px-3.5 py-2 rounded-xl border border-[#D9CFC4] bg-white text-xs text-[#24211E] focus:outline-none focus:border-[#24211E]"
+                  />
                 </div>
 
-                {/* Order Total Bar */}
-                <div className="p-3.5 bg-white rounded-xl border border-[#EAE2D8] flex items-center justify-between text-xs">
-                  <div>
-                    <span className="text-[#6B6158]">
-                      Total Payable ({cart.length} item(s)):
-                    </span>
-                    <span className="ml-2 font-mono text-base font-bold text-[#24211E]">
-                      ₹{currentGrandTotal.toLocaleString('en-IN')}
-                    </span>
+                {/* Payment Method */}
+                <div className="pt-1">
+                  <label className="block text-xs font-medium text-[#24211E] mb-2">
+                    Payment Method
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMode('COD')}
+                      className={`p-3 rounded-xl border text-left transition-all flex items-center gap-2.5 cursor-pointer ${
+                        paymentMode === 'COD'
+                          ? 'bg-[#24211E] text-white border-[#24211E]'
+                          : 'bg-white text-[#24211E] border-[#D9CFC4] hover:border-[#24211E]'
+                      }`}
+                    >
+                      <Banknote
+                        className={`w-4 h-4 shrink-0 ${
+                          paymentMode === 'COD'
+                            ? 'text-[#E09F67]'
+                            : 'text-[#6B6158]'
+                        }`}
+                      />
+                      <div>
+                        <div className="text-xs font-semibold">
+                          Cash on Delivery
+                        </div>
+                        <div
+                          className={`text-[10px] ${
+                            paymentMode === 'COD'
+                              ? 'text-white/75'
+                              : 'text-[#8C827A]'
+                          }`}
+                        >
+                          Pay at your doorstep
+                        </div>
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMode('UPI')}
+                      className={`p-3 rounded-xl border text-left transition-all flex items-center gap-2.5 cursor-pointer ${
+                        paymentMode === 'UPI'
+                          ? 'bg-[#24211E] text-white border-[#24211E]'
+                          : 'bg-white text-[#24211E] border-[#D9CFC4] hover:border-[#24211E]'
+                      }`}
+                    >
+                      <CreditCard
+                        className={`w-4 h-4 shrink-0 ${
+                          paymentMode === 'UPI'
+                            ? 'text-[#E09F67]'
+                            : 'text-[#6B6158]'
+                        }`}
+                      />
+                      <div>
+                        <div className="text-xs font-semibold">Instant UPI</div>
+                        <div
+                          className={`text-[10px] ${
+                            paymentMode === 'UPI'
+                              ? 'text-white/75'
+                              : 'text-[#8C827A]'
+                          }`}
+                        >
+                          GPay, PhonePe, Paytm
+                        </div>
+                      </div>
+                    </button>
                   </div>
+                </div>
+
+                {/* Order Summary & Submit CTA */}
+                <div className="p-4 bg-white rounded-xl border border-[#EAE2D8] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="space-y-0.5 text-xs">
+                    <div className="text-[#6B6158]">
+                      Total Payable ({cart.reduce((a, b) => a + b.quantity, 0)}{' '}
+                      items):{' '}
+                      <strong className="font-mono text-base text-[#24211E] tabular-nums">
+                        ₹{grandTotal.toLocaleString('en-IN')}
+                      </strong>
+                    </div>
+                    <div className="text-[11px] text-[#7B8A78] flex items-center gap-1">
+                      <ShieldCheck className="w-3.5 h-3.5" />
+                      <span>
+                        Free Express Delivery · Arrives in 4 Days
+                      </span>
+                    </div>
+                  </div>
+
                   <button
                     type="submit"
-                    disabled={isPlacingOrder}
-                    className="py-3 px-6 bg-[#24211E] hover:bg-[#3A3530] text-white text-xs uppercase tracking-widest font-semibold rounded-full flex items-center gap-2 shadow-md transition-all active:scale-98 disabled:opacity-60"
+                    disabled={isSubmittingOrder}
+                    className="py-3.5 px-7 bg-[#24211E] hover:bg-[#3A3530] text-[#FAF8F5] text-xs uppercase tracking-wider font-semibold rounded-full transition-all flex items-center justify-center gap-2 shadow-md cursor-pointer disabled:opacity-60 whitespace-nowrap shrink-0"
                   >
-                    {isPlacingOrder ? (
+                    {isSubmittingOrder ? (
                       <>
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <Loader2 className="w-4 h-4 animate-spin" />
                         <span>Placing Order...</span>
                       </>
                     ) : (
                       <>
                         <span>Place Order</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
+                        <ArrowRight className="w-4 h-4" />
                       </>
                     )}
                   </button>
@@ -731,124 +831,114 @@ ${itemsListText}
               </form>
             )}
 
-            {/* STEP 3: ORDER CONFIRMED */}
+            {/* =================================================================
+                STEP 3: COMPACT "THANK YOU" CONFIRMATION POPUP (Form-sized, no manual WhatsApp click required)
+               ================================================================= */}
             {step === 'confirmed' && (
-              <div className="text-center py-3 space-y-5">
-                <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-700 mx-auto flex items-center justify-center border border-emerald-200 shadow-xs">
-                  <CheckCircle2 className="w-7 h-7 text-emerald-600" />
-                </div>
-
-                <div>
-                  <div className="text-xs uppercase tracking-widest text-emerald-700 font-semibold mb-1">
-                    Order Received Successfully
+              <div className="py-3 space-y-5">
+                <div className="text-center space-y-2">
+                  <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center mx-auto">
+                    <CheckCircle2 className="w-6 h-6" />
                   </div>
-                  <h3 className="font-editorial text-2xl sm:text-3xl text-[#24211E]">
-                    Thank You, {formData.fullName}
-                  </h3>
-                  <p className="font-mono text-sm font-bold text-[#C87D65] mt-0.5">
-                    {orderNumber}
-                  </p>
-                  <p className="text-xs text-[#6B6158] max-w-md mx-auto mt-2 leading-relaxed">
-                    We have registered your order for{' '}
-                    <strong>{formData.phone}</strong>. You will receive an
-                    automated confirmation call within 5 minutes to verify your
-                    order before dispatch.
+                  <h4 className="font-editorial text-2xl sm:text-3xl text-[#24211E] font-medium">
+                    Thank You, {fullName.split(' ')[0] || 'Valued Guest'}!
+                  </h4>
+                  <p className="text-xs text-[#6B6158] max-w-md mx-auto leading-relaxed">
+                    Your order{' '}
+                    <span className="font-mono font-semibold text-[#24211E]">
+                      #{orderNumber}
+                    </span>{' '}
+                    has been placed and your details have been automatically
+                    registered with our studio dispatch team.
                   </p>
                 </div>
 
-                {/* Ordered Items Summary */}
-                <div className="p-4 bg-white rounded-xl border border-[#EAE2D8] max-w-lg mx-auto text-left text-xs space-y-2">
-                  <div className="flex items-center justify-between pb-2 border-b border-[#F0EBE4] font-medium text-[#24211E]">
-                    <span>Ordered Pieces ({placedCartSnapshot.length})</span>
-                    <span className="font-mono font-bold">
-                      ₹{placedGrandTotal.toLocaleString('en-IN')}
-                    </span>
-                  </div>
-                  {placedCartSnapshot.map((item, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-center justify-between text-[#574E45] py-1"
-                    >
-                      <div className="flex items-center gap-2">
-                        <img
-                          src={item.variantImage || item.product.primaryImage}
-                          alt={item.product.name}
-                          className="w-8 h-8 rounded-md object-cover border border-[#EAE2D8]"
-                        />
-                        <div>
-                          <p className="font-medium text-[#24211E] text-xs leading-none">
-                            {item.product.name}
-                          </p>
-                          <span className="text-[10px] text-[#8C827A]">
-                            Variant: {item.selectedColor} × {item.quantity}
-                          </span>
+                {/* Live Delivery ETA & Progress Card */}
+                <div className="p-4 rounded-xl bg-white border border-[#EAE2D8] space-y-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-[#C87D65]" />
+                      <div>
+                        <div className="text-[11px] text-[#8C827A]">
+                          Expected Delivery Date
+                        </div>
+                        <div className="text-xs sm:text-sm font-semibold text-[#24211E]">
+                          {trackingInfo?.estimatedDeliveryDateFormatted ||
+                            'Within 4 Business Days'}
                         </div>
                       </div>
-                      <span className="font-mono font-medium text-[#24211E]">
-                        ₹
-                        {(item.product.price * item.quantity).toLocaleString(
-                          'en-IN'
-                        )}
-                      </span>
                     </div>
-                  ))}
+                    <span className="text-xs font-medium text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-md">
+                      {trackingInfo?.stageLabel || 'Order Confirmed'}
+                    </span>
+                  </div>
+
+                  {/* Progress Bar */}
+                  <div className="w-full h-1.5 bg-[#EAE2D8] rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-[#24211E] rounded-full transition-all duration-500"
+                      style={{
+                        width: `${trackingInfo?.progressPercent || 35}%`,
+                      }}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-4 text-[10px] text-[#6B6158] pt-0.5">
+                    <div className="font-semibold text-[#24211E]">
+                      1. Confirmed
+                    </div>
+                    <div className="text-center font-medium text-[#24211E]">
+                      2. Crafting
+                    </div>
+                    <div className="text-center">3. Shipped</div>
+                    <div className="text-right">4. Delivered</div>
+                  </div>
                 </div>
 
-                {/* Optional WhatsApp Receipt */}
-                <div className="p-4 bg-[#25D366]/10 rounded-2xl border border-[#25D366]/30 max-w-lg mx-auto text-left space-y-2.5">
+                {/* Compact Order Details Summary */}
+                <div className="p-4 rounded-xl bg-[#F5EFEB]/70 border border-[#EAE2D8] space-y-2 text-xs">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <MessageCircle className="w-4 h-4 text-[#128C7E]" />
-                      <span className="text-xs font-semibold text-[#24211E]">
-                        Share Order Receipt on WhatsApp
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleCopyOrder}
-                      className="text-[11px] flex items-center gap-1 px-2.5 py-1 rounded-md bg-white border border-[#EAE2D8] text-[#24211E]"
-                    >
-                      {isCopied ? (
-                        <>
-                          <Check className="w-3 h-3 text-emerald-600" />
-                          <span>Copied</span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="w-3 h-3" />
-                          <span>Copy</span>
-                        </>
-                      )}
-                    </button>
+                    <span className="text-[#6B6158]">Order ID</span>
+                    <span className="font-mono font-semibold text-[#24211E]">
+                      #{orderNumber}
+                    </span>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    <a
-                      href={primaryWhatsappUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="py-2.5 px-3 bg-[#25D366] hover:bg-[#1EBE5D] text-white text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5"
-                    >
-                      <span>WhatsApp (+91 82373 23043)</span>
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                    <a
-                      href={secondaryWhatsappUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="py-2.5 px-3 bg-[#24211E] hover:bg-[#3A3530] text-white text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5"
-                    >
-                      <span>Backup (+91 85915 42015)</span>
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[#6B6158]">Amount & Payment</span>
+                    <span className="font-mono font-semibold text-[#24211E] tabular-nums">
+                      ₹
+                      {Number(
+                        placedOrderSnapshot?.totalAmount || grandTotal
+                      ).toLocaleString('en-IN')}{' '}
+                      ({paymentMode})
+                    </span>
+                  </div>
+                  <div className="flex items-start justify-between gap-4 pt-1 border-t border-[#EAE2D8]">
+                    <span className="text-[#6B6158] shrink-0">Delivering To</span>
+                    <span className="text-[#24211E] text-right font-medium">
+                      {fullName}, {address}, {city}, {state} - {pincode}
+                    </span>
                   </div>
                 </div>
 
-                <button
-                  onClick={handleClose}
-                  className="py-2.5 px-8 border border-[#24211E] text-[#24211E] hover:bg-[#24211E] hover:text-white text-xs uppercase tracking-widest font-medium rounded-full transition-colors"
-                >
-                  Continue Exploring Wolko
-                </button>
+                {/* Action Buttons */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                  <button
+                    type="button"
+                    onClick={handleOpenDashboardFromThankYou}
+                    className="w-full py-3 px-4 bg-[#24211E] hover:bg-[#3A3530] text-white text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <Package className="w-4 h-4" />
+                    <span>Track Order in My Account</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleClose}
+                    className="w-full py-3 px-4 bg-white hover:bg-[#F5EFEB] text-[#24211E] border border-[#D9CFC4] text-xs font-semibold rounded-xl transition-all cursor-pointer"
+                  >
+                    Continue Shopping
+                  </button>
+                </div>
               </div>
             )}
           </div>

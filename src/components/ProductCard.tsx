@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Heart, Plus, Check } from 'lucide-react';
 import { Product } from '../data/products';
 import { useShop } from '../context/ShopContext';
+import { ProductCommentBox } from './ProductCommentBox';
 
 interface ProductCardProps {
   product: Product;
@@ -140,6 +141,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, featuredLayou
             )}
           </div>
         </div>
+
+        {/* Real Customer Comment Box Below Every Product */}
+        <ProductCommentBox product={product} variant="card" />
       </div>
     </article>
   );

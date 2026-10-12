@@ -1,0 +1,358 @@
+{
+  "entities": {
+    "CustomerProfile": {
+      "title": "CustomerProfile",
+      "description": "Stores authenticated Google customer profile and saved delivery address details.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Firebase Auth UID of the customer.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Verified Google email address of the customer.",
+          "minLength": 3,
+          "maxLength": 200
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Customer full name.",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "phone": {
+          "type": "string",
+          "description": "Customer active phone/WhatsApp number.",
+          "minLength": 5,
+          "maxLength": 30
+        },
+        "address": {
+          "type": "string",
+          "description": "House/Flat/Street address.",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "landmark": {
+          "type": "string",
+          "description": "Nearby landmark or area.",
+          "minLength": 0,
+          "maxLength": 200
+        },
+        "city": {
+          "type": "string",
+          "description": "Delivery city.",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "state": {
+          "type": "string",
+          "description": "Delivery state.",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "pincode": {
+          "type": "string",
+          "description": "Postal pincode.",
+          "minLength": 4,
+          "maxLength": 20
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server last updated timestamp."
+        }
+      },
+      "required": [
+        "uid",
+        "email",
+        "displayName",
+        "phone",
+        "address",
+        "city",
+        "state",
+        "pincode",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Stores customer order details, address, items summary, and WhatsApp dispatch record.",
+      "type": "object",
+      "properties": {
+        "orderId": {
+          "type": "string",
+          "description": "Unique order identifier (e.g. WOLKO-12345).",
+          "minLength": 3,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the customer who placed the order.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "customerName": {
+          "type": "string",
+          "description": "Full name of the customer.",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "phone": {
+          "type": "string",
+          "description": "Customer phone number.",
+          "minLength": 5,
+          "maxLength": 30
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Customer Google email address.",
+          "minLength": 3,
+          "maxLength": 200
+        },
+        "address": {
+          "type": "string",
+          "description": "Street/House/Flat address.",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "landmark": {
+          "type": "string",
+          "description": "Landmark or locality.",
+          "minLength": 0,
+          "maxLength": 200
+        },
+        "city": {
+          "type": "string",
+          "description": "City.",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "state": {
+          "type": "string",
+          "description": "State.",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "pincode": {
+          "type": "string",
+          "description": "Pincode.",
+          "minLength": 4,
+          "maxLength": 20
+        },
+        "deliveryAddress": {
+          "type": "string",
+          "description": "Formatted full delivery address.",
+          "minLength": 5,
+          "maxLength": 800
+        },
+        "deliveryNotes": {
+          "type": "string",
+          "description": "Optional delivery instructions.",
+          "minLength": 0,
+          "maxLength": 400
+        },
+        "productsSummary": {
+          "type": "string",
+          "description": "Summary of ordered handcrafted products and variants.",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "totalAmount": {
+          "type": "string",
+          "description": "Total order payable amount in INR.",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "paymentMethod": {
+          "type": "string",
+          "description": "Selected payment mode.",
+          "enum": ["UPI", "COD"],
+          "minLength": 2,
+          "maxLength": 40
+        },
+        "whatsappSentTo": {
+          "type": "string",
+          "description": "Store owner WhatsApp number where order details were sent (8591542015).",
+          "minLength": 10,
+          "maxLength": 30
+        },
+        "orderStatus": {
+          "type": "string",
+          "description": "Current status of the order.",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "aiCallStatus": {
+          "type": "string",
+          "description": "Status of the confirmation call.",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "voiceResponse": {
+          "type": "string",
+          "description": "Customer voice confirmation response.",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "Formatted IST date and time string.",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server update timestamp."
+        }
+      },
+      "required": [
+        "orderId",
+        "userId",
+        "customerName",
+        "phone",
+        "email",
+        "address",
+        "landmark",
+        "city",
+        "state",
+        "pincode",
+        "deliveryAddress",
+        "deliveryNotes",
+        "productsSummary",
+        "totalAmount",
+        "paymentMethod",
+        "whatsappSentTo",
+        "orderStatus",
+        "aiCallStatus",
+        "voiceResponse",
+        "timestamp",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "ProductComment": {
+      "title": "ProductComment",
+      "description": "Public customer comment and rating for a Wolko handcrafted product (contains no PII).",
+      "type": "object",
+      "properties": {
+        "commentId": {
+          "type": "string",
+          "description": "Unique comment identifier.",
+          "minLength": 3,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "productId": {
+          "type": "string",
+          "description": "Product identifier.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "productName": {
+          "type": "string",
+          "description": "Display name of the product.",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "userId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the commenter.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "authorName": {
+          "type": "string",
+          "description": "Public display name of the commenter.",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "authorPhotoURL": {
+          "type": "string",
+          "description": "Public Google avatar URL of the commenter.",
+          "minLength": 0,
+          "maxLength": 500
+        },
+        "rating": {
+          "type": "integer",
+          "description": "Star rating from 1 to 5."
+        },
+        "commentText": {
+          "type": "string",
+          "description": "Customer comment text.",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "helpfulCount": {
+          "type": "integer",
+          "description": "Count of helpful votes."
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "Formatted timestamp string.",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server update timestamp."
+        }
+      },
+      "required": [
+        "commentId",
+        "productId",
+        "productName",
+        "userId",
+        "authorName",
+        "authorPhotoURL",
+        "rating",
+        "commentText",
+        "helpfulCount",
+        "timestamp",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/customers/{customerId}": {
+      "schema": "CustomerProfile",
+      "description": "Stores customer Google authentication profile and saved shipping address."
+    },
+    "/orders/{orderId}": {
+      "schema": "Order",
+      "description": "Stores customer orders with delivery address and WhatsApp notification metadata."
+    },
+    "/comments/{commentId}": {
+      "schema": "ProductComment",
+      "description": "Stores public customer comments and ratings for products."
+    }
+  }
+}

@@ -1,12 +1,40 @@
-import React, { useState, useEffect } from 'react';
-import { Search, ShoppingBag, Heart, Menu, X, MessageCircle, Instagram, Flame } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  Search,
+  ShoppingBag,
+  Heart,
+  Menu,
+  X,
+  MessageCircle,
+  Instagram,
+  Flame,
+  User,
+  Package,
+  MapPin,
+  LogOut,
+  ChevronDown,
+} from 'lucide-react';
 import { useShop } from '../context/ShopContext';
 import { BRAND_ASSETS } from '../data/products';
+import { UserAvatar } from './UserAvatar';
 
 export const Header: React.FC = () => {
-  const { cartCount, setIsCartOpen, wishlist, setIsWishlistOpen, setIsSearchOpen } = useShop();
+  const {
+    cartCount,
+    setIsCartOpen,
+    wishlist,
+    setIsWishlistOpen,
+    setIsSearchOpen,
+    googleUser,
+    handleGoogleLogout,
+    openCustomerDashboard,
+    customerOrders,
+  } = useShop();
+
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [accountDropdownOpen, setAccountDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -14,6 +42,20 @@ export const Header: React.FC = () => {
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Close account dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setAccountDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const scrollToSection = (id: string) => {
@@ -65,12 +107,11 @@ export const Header: React.FC = () => {
 
             {/* Zone 2: Navigation Links (Desktop) */}
             <nav className="hidden md:flex items-center gap-6 lg:gap-7 text-[13px] tracking-wide font-medium text-[#4A443E]">
-              {/* Diwali Sale Highlight Tab */}
               <button
                 onClick={() => scrollToSection('diwali-sale')}
                 className="px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/15 to-rose-500/15 border border-amber-400/50 text-[#8B2E1E] hover:text-[#701E10] font-semibold transition-all flex items-center gap-1.5 shadow-2xs hover:scale-105"
               >
-                <Flame className="w-3.5 h-3.5 text-amber-600 fill-amber-500 animate-pulse" />
+                <Flame className="w-3.5 h-3.5 text-amber-600 fill-amber-500" />
                 <span>Diwali Sale</span>
                 <span className="text-[9px] bg-rose-600 text-white font-mono font-bold px-1.5 py-0.2 rounded-full uppercase">
                   Offers
@@ -82,7 +123,6 @@ export const Header: React.FC = () => {
                 className="hover:text-[#24211E] transition-colors relative py-1 hover:underline underline-offset-8 decoration-[#C87D65] flex items-center gap-1.5"
               >
                 <span>3D Spatial</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-[#C87D65]" />
               </button>
               <button
                 onClick={() => scrollToSection('collection')}
@@ -108,16 +148,10 @@ export const Header: React.FC = () => {
               >
                 About Wolko
               </button>
-              <button
-                onClick={() => scrollToSection('contact')}
-                className="hover:text-[#24211E] transition-colors relative py-1 hover:underline underline-offset-8 decoration-[#8C827A]"
-              >
-                Connect
-              </button>
             </nav>
 
-            {/* Zone 3: Actions (Search, Wishlist, WhatsApp, Instagram, Cart) */}
-            <div className="flex items-center gap-1.5 sm:gap-3">
+            {/* Zone 3: Actions (Search, Account Dropdown, Wishlist, Cart) */}
+            <div className="flex items-center gap-1.5 sm:gap-2.5">
               {/* Instagram Direct Link */}
               <a
                 href="https://www.instagram.com/shop_wolko?utm_source=ig_web_button_share_sheet&stkn=ZDNlZDc0MzIxNw=="
@@ -128,19 +162,6 @@ export const Header: React.FC = () => {
                 aria-label="Instagram"
               >
                 <Instagram className="w-3.5 h-3.5" />
-              </a>
-
-              {/* WhatsApp Direct Chat */}
-              <a
-                href="https://wa.me/918237323043?text=Hi%20Wolko!%20I%20have%20an%20inquiry%20about%20your%20handcrafted%20crochet%20collection."
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-[#25D366]/40 bg-[#25D366]/10 text-[#128C7E] hover:bg-[#25D366] hover:text-white text-xs font-medium transition-all shadow-2xs"
-                title="Chat on WhatsApp (+91 82373 23043)"
-                aria-label="WhatsApp Chat"
-              >
-                <MessageCircle className="w-3.5 h-3.5 fill-current" />
-                <span className="hidden xl:inline text-[11px] font-semibold">WhatsApp</span>
               </a>
 
               <button
@@ -155,6 +176,147 @@ export const Header: React.FC = () => {
                 </span>
               </button>
 
+              {/* YOUR ACCOUNT DROPDOWN MENU (Minimal & Essential: My Profile, Orders, Saved Addresses, Wishlist, Logout) */}
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  type="button"
+                  onClick={() => setAccountDropdownOpen((prev) => !prev)}
+                  className="flex items-center gap-1.5 pl-1.5 pr-2.5 py-1 rounded-full border border-[#D9CFC4] bg-white hover:bg-[#F5EFEB] text-[#24211E] text-xs font-medium transition-colors cursor-pointer"
+                  aria-label="Your Account"
+                >
+                  {googleUser ? (
+                    <UserAvatar
+                      photoURL={googleUser.photoURL}
+                      email={googleUser.email}
+                      name={googleUser.displayName}
+                      sizeClass="w-6 h-6"
+                      textClass="text-[11px]"
+                    />
+                  ) : (
+                    <span className="w-6 h-6 rounded-full bg-[#F5EFEB] flex items-center justify-center">
+                      <User className="w-3.5 h-3.5 text-[#24211E]" />
+                    </span>
+                  )}
+                  <span className="hidden sm:inline max-w-[90px] truncate">
+                    {googleUser?.displayName?.split(' ')[0] || 'Account'}
+                  </span>
+                  {customerOrders.length > 0 && (
+                    <span className="px-1.5 py-0.2 rounded-full bg-[#24211E] text-[#FAF8F5] font-mono text-[10px] tabular-nums">
+                      {customerOrders.length}
+                    </span>
+                  )}
+                  <ChevronDown className="w-3 h-3 text-[#8C827A]" />
+                </button>
+
+                {accountDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-64 rounded-2xl bg-white shadow-xl border border-[#EAE2D8] py-3 z-50">
+                    <div className="px-4 pb-3 mb-1.5 border-b border-[#EAE2D8] flex items-center gap-3">
+                      <UserAvatar
+                        photoURL={googleUser?.photoURL}
+                        email={googleUser?.email}
+                        name={googleUser?.displayName}
+                        sizeClass="w-10 h-10"
+                        textClass="text-sm"
+                        showGoogleBadge={Boolean(googleUser)}
+                      />
+                      <div className="min-w-0 flex-1">
+                        <div className="text-sm font-semibold text-[#24211E] truncate">
+                          {googleUser?.displayName || 'Your Account'}
+                        </div>
+                        {googleUser?.email ? (
+                          <div className="text-[11px] text-[#8C827A] truncate mt-0.5">
+                            {googleUser.email}
+                          </div>
+                        ) : (
+                          <div className="text-[11px] text-[#8C827A] mt-0.5">
+                            Track orders & saved address
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="py-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAccountDropdownOpen(false);
+                          openCustomerDashboard('profile');
+                        }}
+                        className="w-full px-4 py-2.5 text-left text-xs text-[#24211E] hover:bg-[#FAF8F5] flex items-center gap-3 transition-colors cursor-pointer"
+                      >
+                        <User className="w-4 h-4 text-[#574E45]" />
+                        <span>My Profile</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAccountDropdownOpen(false);
+                          openCustomerDashboard('orders');
+                        }}
+                        className="w-full px-4 py-2.5 text-left text-xs text-[#24211E] hover:bg-[#FAF8F5] flex items-center justify-between transition-colors cursor-pointer"
+                      >
+                        <span className="flex items-center gap-3">
+                          <Package className="w-4 h-4 text-[#574E45]" />
+                          <span>Orders</span>
+                        </span>
+                        {customerOrders.length > 0 && (
+                          <span className="font-mono text-[11px] font-semibold text-[#C87D65] tabular-nums">
+                            {customerOrders.length}
+                          </span>
+                        )}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAccountDropdownOpen(false);
+                          openCustomerDashboard('addresses');
+                        }}
+                        className="w-full px-4 py-2.5 text-left text-xs text-[#24211E] hover:bg-[#FAF8F5] flex items-center gap-3 transition-colors cursor-pointer"
+                      >
+                        <MapPin className="w-4 h-4 text-[#574E45]" />
+                        <span>Saved Addresses</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAccountDropdownOpen(false);
+                          setIsWishlistOpen(true);
+                        }}
+                        className="w-full px-4 py-2.5 text-left text-xs text-[#24211E] hover:bg-[#FAF8F5] flex items-center justify-between transition-colors cursor-pointer"
+                      >
+                        <span className="flex items-center gap-3">
+                          <Heart className="w-4 h-4 text-[#574E45]" />
+                          <span>Wishlist</span>
+                        </span>
+                        {wishlist.length > 0 && (
+                          <span className="font-mono text-[11px] text-[#8C827A] tabular-nums">
+                            {wishlist.length}
+                          </span>
+                        )}
+                      </button>
+                    </div>
+
+                    {googleUser && (
+                      <div className="pt-1.5 mt-1 border-t border-[#EAE2D8]">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setAccountDropdownOpen(false);
+                            handleGoogleLogout();
+                          }}
+                          className="w-full px-4 py-2.5 text-left text-xs text-rose-700 hover:bg-rose-50 flex items-center gap-3 transition-colors cursor-pointer"
+                        >
+                          <LogOut className="w-4 h-4" />
+                          <span>Logout</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
 
               <button
                 onClick={() => setIsWishlistOpen(true)}
@@ -215,14 +377,46 @@ export const Header: React.FC = () => {
             </button>
           </div>
 
-          <nav className="flex flex-col gap-4 py-6 text-xl font-editorial text-[#24211E]">
+          <nav className="flex flex-col gap-3.5 py-6 text-lg font-editorial text-[#24211E]">
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                openCustomerDashboard('orders');
+              }}
+              className="text-left py-2.5 px-3.5 rounded-xl bg-white border border-[#EAE2D8] text-[#24211E] flex items-center justify-between font-medium"
+            >
+              <span className="flex items-center gap-2.5">
+                {googleUser ? (
+                  <UserAvatar
+                    photoURL={googleUser.photoURL}
+                    email={googleUser.email}
+                    name={googleUser.displayName}
+                    sizeClass="w-6 h-6"
+                    textClass="text-xs"
+                  />
+                ) : (
+                  <Package className="w-4 h-4 text-[#C87D65]" />
+                )}
+                <span>
+                  {googleUser?.displayName
+                    ? `${googleUser.displayName} · Orders`
+                    : 'My Account & Live Orders'}
+                </span>
+              </span>
+              {customerOrders.length > 0 && (
+                <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-[#24211E] text-white tabular-nums">
+                  {customerOrders.length}
+                </span>
+              )}
+            </button>
+
             <button
               onClick={() => scrollToSection('diwali-sale')}
-              className="text-left py-2.5 px-3 rounded-xl bg-gradient-to-r from-amber-500/15 via-rose-500/15 to-transparent border border-amber-400/40 text-[#8B2E1E] transition-colors flex items-center justify-between font-semibold"
+              className="text-left py-2.5 px-3.5 rounded-xl bg-gradient-to-r from-amber-500/15 via-rose-500/15 to-transparent border border-amber-400/40 text-[#8B2E1E] transition-colors flex items-center justify-between font-semibold"
             >
               <span className="flex items-center gap-2">
                 <Flame className="w-4 h-4 text-amber-600 fill-amber-500" />
-                <span>🪔 Shubh Diwali Specials</span>
+                <span>Shubh Diwali Specials</span>
               </span>
               <span className="text-[10px] font-sans uppercase font-mono px-2 py-0.5 rounded-full bg-rose-600 text-white">
                 Offers Active
@@ -233,7 +427,9 @@ export const Header: React.FC = () => {
               className="text-left py-2 hover:text-[#C87D65] transition-colors border-b border-[#EAE2D8]/40 flex items-center justify-between"
             >
               <span>01. 3D Spatial Experience</span>
-              <span className="text-xs uppercase font-sans tracking-widest text-[#C87D65]">New</span>
+              <span className="text-xs uppercase font-sans tracking-widest text-[#C87D65]">
+                New
+              </span>
             </button>
             <button
               onClick={() => scrollToSection('collection')}
@@ -259,24 +455,18 @@ export const Header: React.FC = () => {
             >
               05. About Our Studio
             </button>
-            <button
-              onClick={() => scrollToSection('contact')}
-              className="text-left py-2 hover:text-[#C87D65] transition-colors border-b border-[#EAE2D8]/40"
-            >
-              06. Contact & Inquiries
-            </button>
           </nav>
 
           <div className="mt-auto pt-6 border-t border-[#EAE2D8] flex flex-col gap-3">
             <div className="flex items-center gap-2">
               <a
-                href="https://wa.me/918237323043?text=Hi%20Wolko!%20I%20have%20an%20inquiry%20about%20your%20handcrafted%20crochet%20collection."
+                href="https://wa.me/918591542015?text=Hi%20Wolko!%20I%20have%20an%20inquiry%20about%20your%20handcrafted%20crochet%20collection."
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex-1 py-2.5 px-4 rounded-xl bg-[#25D366] text-white text-xs font-semibold flex items-center justify-center gap-2"
               >
                 <MessageCircle className="w-4 h-4 fill-white" />
-                <span>WhatsApp: 82373 23043</span>
+                <span>Customer Support</span>
               </a>
               <a
                 href="https://www.instagram.com/shop_wolko?utm_source=ig_web_button_share_sheet&stkn=ZDNlZDc0MzIxNw=="
@@ -287,10 +477,6 @@ export const Header: React.FC = () => {
               >
                 <Instagram className="w-4 h-4" />
               </a>
-            </div>
-            <div className="text-xs text-[#8C827A] flex flex-col gap-0.5">
-              <p>Backup Dispatch: +91 8591542015</p>
-              <p>Email: connectwithwolko@gmail.com</p>
             </div>
           </div>
         </div>

@@ -1,0 +1,28 @@
+[
+  {
+    "orderId": "WOLKO-TEST-651",
+    "recipientWhatsApp": "918591542015",
+    "dispatchedAt": "2026-10-12T02:00:03.362Z",
+    "lastAttemptAt": "2026-10-12T02:00:03.362Z",
+    "customerName": "Wolko Automation Verification",
+    "customerPhone": "+91 85915 42015",
+    "customerEmail": "krishprakashsolanki@gmail.com",
+    "address": "Studio Verification Dispatch",
+    "landmark": "Main Atelier",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "pincode": "400001",
+    "deliveryNotes": "Automated test verification message for 8591542015",
+    "deliveryAddress": "Studio Verification Dispatch, Main Atelier, Mumbai, Maharashtra - 400001",
+    "productsSummary": "1x Daisy Pastel Tote Bag (Buttercream)",
+    "totalAmount": "1,850",
+    "paymentMethod": "COD",
+    "message": "✨ *NEW WOLKO ORDER PLACED* ✨\n🆔 *Order ID:* WOLKO-TEST-651\n📅 *Date:* 12/10/2026, 2:00:02 am\n\n👤 *Customer Details:*\n• *Name:* Wolko Automation Verification\n• *Phone / WhatsApp:* +91 85915 42015\n• *Google Email:* krishprakashsolanki@gmail.com\n\n📍 *Complete Delivery Address:*\n• *Street / House:* Studio Verification Dispatch\n• *Landmark:* Main Atelier\n• *City / State:* Mumbai, Maharashtra\n• *Pincode:* 400001\n• *Delivery Note:* Automated test verification message for 8591542015\n• *Full Address:* Studio Verification Dispatch, Main Atelier, Mumbai, Maharashtra - 400001\n\n🛍️ *Items Ordered:*\n1x Daisy Pastel Tote Bag (Buttercream)\n\n💰 *Total Amount:* *₹1,850*\n💳 *Payment Method:* *COD*",
+    "status": "WEBHOOK_RELAYED_AWAITING_WHATSAPP_LINK",
+    "deliveredToWhatsApp": false,
+    "webhookDelivered": true,
+    "channelsDelivered": [
+      "Live Push Webhook (ntfy.sh/wolko_orders_8591542015)"
+    ]
+  }
+]

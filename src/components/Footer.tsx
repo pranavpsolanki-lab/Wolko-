@@ -1,10 +1,8 @@
 import React from 'react';
 import { BRAND_ASSETS } from '../data/products';
-import { Mail, Phone, Instagram, Youtube, Pin as Pinterest, Facebook, Heart, MessageCircle, Lock } from 'lucide-react';
-import { useShop } from '../context/ShopContext';
+import { Instagram, Youtube, Pin as Pinterest, Facebook, Heart, MessageCircle } from 'lucide-react';
 
 export const Footer: React.FC = () => {
-  const { setIsAdminOpen } = useShop();
   const scrollTo = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -276,15 +274,6 @@ export const Footer: React.FC = () => {
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#7B736B]">
           <div className="flex items-center gap-3">
             <span>© {new Date().getFullYear()} Wolko Studio. All rights reserved.</span>
-            <button
-              type="button"
-              onClick={() => setIsAdminOpen(true)}
-              className="inline-flex items-center gap-1 text-[11px] text-[#5C554E] hover:text-[#A89E96] transition-colors"
-              title="Admin Backend & Google Sheets Console"
-            >
-              <Lock className="w-3 h-3" />
-              <span>Admin</span>
-            </button>
           </div>
 
           <div className="flex items-center gap-1 text-[11px]">

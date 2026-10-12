@@ -629,7 +629,7 @@
       detailsHtml += '<li class="flex items-start gap-2 text-xs text-[#574E45]"><span class="text-[#7B8A78]">•</span><span>' + escapeHtml(d) + '</span></li>';
     });
 
-    var waNumber = config.whatsappPrimary || '918237323043';
+    var waNumber = config.whatsappPrimary || '918591542015';
     var waMsg = encodeURIComponent('Hi Wolko! I want to order *' + product.name + '* (Variant: ' + chosenColor + ') priced at ' + formatINR(product.price) + '.');
 
     body.innerHTML =
@@ -769,6 +769,140 @@
   }
 
   // =========================================================================
+  // 6B. 2-STEP GOOGLE SIGN-UP + CUSTOMER DETAILS & WHATSAPP 8591542015 MODAL
+  // =========================================================================
+  var checkoutState = {
+    step: 'google-auth',
+    user: null,
+    showEmailForm: false,
+    orderId: '',
+    whatsappUrl: '',
+    whatsappMsg: ''
+  };
+
+  try {
+    var savedGUser = localStorage.getItem('wolko_google_user');
+    if (savedGUser) {
+      checkoutState.user = JSON.parse(savedGUser);
+      checkoutState.step = 'details-form';
+    }
+  } catch (e) {}
+
+  function openCheckoutModal() {
+    closeCartDrawer();
+    var modal = document.getElementById('wolko-checkout-modal');
+    if (!modal) return;
+    if (checkoutState.user && checkoutState.step === 'google-auth') {
+      checkoutState.step = 'details-form';
+    }
+    renderCheckoutModal();
+    modal.classList.remove('hidden');
+    modal.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeCheckoutModal() {
+    var modal = document.getElementById('wolko-checkout-modal');
+    if (modal) {
+      modal.classList.add('hidden');
+      modal.setAttribute('aria-hidden', 'true');
+    }
+    if (checkoutState.step === 'confirmed') {
+      checkoutState.step = checkoutState.user ? 'details-form' : 'google-auth';
+    }
+  }
+
+  function renderCheckoutModal() {
+    var modal = document.getElementById('wolko-checkout-modal');
+    if (!modal) return;
+
+    var subtotal = state.cartItems.reduce(function (acc, item) {
+      return acc + item.price * item.quantity;
+    }, 0);
+    var shipping = subtotal >= 1999 ? 0 : 150;
+    var grandTotal = subtotal + shipping;
+
+    var bodyHtml = '';
+    if (checkoutState.step === 'google-auth') {
+      bodyHtml =
+        '<div class="py-6 text-center max-w-md mx-auto space-y-5">' +
+          '<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-[10px] font-mono uppercase tracking-wider text-emerald-800">Firebase Google Authentication</div>' +
+          '<h4 class="font-editorial text-2xl sm:text-3xl text-[#24211E] font-medium">Sign Up with Google to Order</h4>' +
+          '<p class="text-xs text-[#6B6158] font-light leading-relaxed">Sign in with your Google account first. Next, fill in your Name, Phone Number, and Complete Address to send your order to WhatsApp (+91 85915 42015).</p>' +
+          '<form id="wolko-theme-google-form" class="p-5 rounded-2xl bg-white border border-[#EAE2D8] shadow-md text-left space-y-3.5">' +
+            '<div>' +
+              '<label class="block text-xs font-medium text-[#24211E] mb-1">Google Email Address *</label>' +
+              '<input type="email" id="wolko-g-email" required placeholder="yourname@gmail.com" class="w-full px-3.5 py-2.5 rounded-xl border border-[#D9CFC4] bg-[#FAF8F5] text-xs text-[#24211E]">' +
+            '</div>' +
+            '<div>' +
+              '<label class="block text-xs font-medium text-[#24211E] mb-1">Your Full Name *</label>' +
+              '<input type="text" id="wolko-g-name" required placeholder="Enter your full name" class="w-full px-3.5 py-2.5 rounded-xl border border-[#D9CFC4] bg-[#FAF8F5] text-xs text-[#24211E]">' +
+            '</div>' +
+            '<button type="submit" class="w-full py-3 px-4 rounded-xl bg-[#24211E] hover:bg-[#3A3530] text-white text-xs font-semibold flex items-center justify-center gap-2 shadow-sm cursor-pointer">' +
+              '<span>Continue with Google &rarr;</span>' +
+            '</button>' +
+          '</form>' +
+        '</div>';
+    } else if (checkoutState.step === 'details-form') {
+      var uName = (checkoutState.user && checkoutState.user.displayName) || '';
+      var uEmail = (checkoutState.user && checkoutState.user.email) || '';
+      bodyHtml =
+        '<form id="wolko-theme-order-form" class="space-y-4">' +
+          '<div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between text-xs">' +
+            '<div><span class="font-semibold text-emerald-950">Signed in with Google:</span> <span class="text-emerald-700">' + escapeHtml(uEmail) + '</span></div>' +
+            '<button type="button" data-theme-google-switch class="text-[11px] text-emerald-800 underline cursor-pointer">Change</button>' +
+          '</div>' +
+          '<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">' +
+            '<div><label class="block text-xs font-semibold text-[#24211E] mb-1">Full Name (आपका नाम) *</label><input type="text" id="wolko-f-name" required value="' + escapeHtml(uName) + '" placeholder="Full Name" class="w-full px-3.5 py-2.5 rounded-xl border border-[#C87D65]/60 bg-white text-xs"></div>' +
+            '<div><label class="block text-xs font-semibold text-[#24211E] mb-1">Phone / WhatsApp No. (फ़ोन नंबर) *</label><input type="tel" id="wolko-f-phone" required placeholder="e.g. 9876543210" class="w-full px-3.5 py-2.5 rounded-xl border border-[#C87D65]/60 bg-white text-xs font-mono"></div>' +
+          '</div>' +
+          '<div><label class="block text-xs font-medium text-[#574E45] mb-1">House / Flat / Street Address *</label><input type="text" id="wolko-f-address" required placeholder="House/Flat No., Building, Street" class="w-full px-3.5 py-2.5 rounded-xl border border-[#D9CFC4] bg-white text-xs"></div>' +
+          '<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">' +
+            '<div><label class="block text-xs font-medium text-[#574E45] mb-1">Landmark / Area</label><input type="text" id="wolko-f-landmark" placeholder="Near Metro / Temple / Mall" class="w-full px-3.5 py-2 rounded-xl border border-[#D9CFC4] bg-white text-xs"></div>' +
+            '<div><label class="block text-xs font-medium text-[#574E45] mb-1">Email *</label><input type="email" id="wolko-f-email" required value="' + escapeHtml(uEmail) + '" class="w-full px-3.5 py-2 rounded-xl border border-[#D9CFC4] bg-white text-xs"></div>' +
+          '</div>' +
+          '<div class="grid grid-cols-3 gap-3">' +
+            '<div><label class="block text-xs font-medium text-[#574E45] mb-1">City *</label><input type="text" id="wolko-f-city" required placeholder="City" class="w-full px-3.5 py-2 rounded-xl border border-[#D9CFC4] bg-white text-xs"></div>' +
+            '<div><label class="block text-xs font-medium text-[#574E45] mb-1">State *</label><input type="text" id="wolko-f-state" required placeholder="State" class="w-full px-3.5 py-2 rounded-xl border border-[#D9CFC4] bg-white text-xs"></div>' +
+            '<div><label class="block text-xs font-medium text-[#574E45] mb-1">Pincode *</label><input type="text" id="wolko-f-pincode" required placeholder="400001" class="w-full px-3.5 py-2 rounded-xl border border-[#D9CFC4] bg-white text-xs font-mono"></div>' +
+          '</div>' +
+          '<div class="grid grid-cols-2 gap-3">' +
+            '<label class="p-3 rounded-xl border border-[#24211E] bg-white text-xs font-semibold flex items-center gap-2 cursor-pointer"><input type="radio" name="wolko_pay" value="COD" checked> <span>Cash on Delivery (COD)</span></label>' +
+            '<label class="p-3 rounded-xl border border-[#EAE2D8] bg-white text-xs font-semibold flex items-center gap-2 cursor-pointer"><input type="radio" name="wolko_pay" value="UPI"> <span>Instant UPI (GPay / PhonePe)</span></label>' +
+          '</div>' +
+          '<div class="p-4 bg-white rounded-xl border border-[#EAE2D8] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">' +
+            '<div><span class="text-[#6B6158]">Total Payable:</span> <strong class="font-mono text-base text-[#24211E]">' + formatINR(grandTotal) + '</strong><div class="text-[10px] text-emerald-700">Free Express Shipping &middot; Arrives in 4 Days</div></div>' +
+            '<button type="submit" class="py-3.5 px-6 bg-[#24211E] hover:bg-[#3A3530] text-white text-xs uppercase tracking-wider font-bold rounded-full cursor-pointer">Place Order &rarr;</button>' +
+          '</div>' +
+        '</form>';
+    } else {
+      var etaDate = new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toLocaleDateString('en-IN', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' });
+      bodyHtml =
+        '<div class="text-center py-4 space-y-4">' +
+          '<div class="text-xs uppercase tracking-widest text-emerald-700 font-semibold">Order Confirmed</div>' +
+          '<h3 class="font-editorial text-2xl sm:text-3xl text-[#24211E]">Thank You for Your Order!</h3>' +
+          '<p class="text-xs text-[#6B6158] max-w-md mx-auto">Order <strong>#' + escapeHtml(checkoutState.orderId) + '</strong> has been placed and automatically queued for our studio artisans.</p>' +
+          '<div class="p-4 bg-white rounded-xl border border-[#EAE2D8] max-w-md mx-auto text-left space-y-2 text-xs">' +
+            '<div class="flex items-center justify-between"><span class="text-[#6B6158]">Expected Delivery Date</span><strong class="text-[#24211E]">' + escapeHtml(etaDate) + '</strong></div>' +
+            '<div class="flex items-center justify-between"><span class="text-[#6B6158]">Status</span><span class="text-emerald-700 font-semibold">Order Confirmed &middot; Artisan Crafting</span></div>' +
+          '</div>' +
+          '<button type="button" data-close-checkout-modal class="py-3 px-6 bg-[#24211E] hover:bg-[#3A3530] text-white text-xs font-semibold rounded-full cursor-pointer">Continue Shopping</button>' +
+        '</div>';
+    }
+
+    modal.innerHTML =
+      '<div data-close-checkout-modal class="fixed inset-0 bg-[#24211E]/60 backdrop-blur-xs"></div>' +
+      '<div class="min-h-full flex items-center justify-center p-4 sm:p-6">' +
+        '<div class="relative w-full max-w-xl bg-[#FAF8F5] rounded-2xl shadow-2xl border border-[#EAE2D8] overflow-hidden flex flex-col my-8">' +
+          '<div class="px-6 py-4 border-b border-[#EAE2D8] bg-white flex items-center justify-between">' +
+            '<div><h3 class="font-editorial text-lg font-semibold text-[#24211E]">Wolko Express Checkout</h3><p class="text-[10px] text-[#8C827A]">Secure Order &amp; Live Delivery Tracking</p></div>' +
+            '<button type="button" data-close-checkout-modal class="p-1.5 text-[#8C827A] hover:text-[#24211E] rounded-full cursor-pointer">&#10005;</button>' +
+          '</div>' +
+          '<div class="p-6 sm:p-8 overflow-y-auto max-h-[80vh]">' + bodyHtml + '</div>' +
+        '</div>' +
+      '</div>';
+  }
+
+  // =========================================================================
   // 7. EVENT DELEGATION & INITIALIZATION
   // =========================================================================
   function initEvents() {
@@ -833,7 +967,25 @@
         var buyId = buyNowBtn.getAttribute('data-buy-now-id');
         var buyColor = buyNowBtn.getAttribute('data-buy-now-color') || state.selectedColors[buyId];
         closeProductModal();
-        addToBag(buyId, buyColor, 1, true);
+        addToBag(buyId, buyColor, 1, false);
+        openCheckoutModal();
+        return;
+      }
+
+      // Open / Close 2-Step Checkout Modal
+      if (target.closest('[data-open-checkout-modal]')) {
+        openCheckoutModal();
+        return;
+      }
+      if (target.closest('[data-close-checkout-modal]')) {
+        closeCheckoutModal();
+        return;
+      }
+      if (target.closest('[data-theme-google-switch]')) {
+        checkoutState.user = null;
+        checkoutState.step = 'google-auth';
+        try { localStorage.removeItem('wolko_google_user'); } catch (err) {}
+        renderCheckoutModal();
         return;
       }
 
@@ -885,20 +1037,6 @@
       if (target.closest('#wolko-gift-note-toggle')) {
         var box = document.getElementById('wolko-gift-note-box');
         if (box) box.classList.toggle('hidden');
-        return;
-      }
-
-      // WhatsApp Checkout from Cart Drawer
-      if (target.closest('#wolko-whatsapp-checkout-btn')) {
-        var lines = state.cartItems.map(function (item) {
-          return '• ' + item.name + ' (' + item.color + ') × ' + item.quantity + ' = ' + formatINR(item.price * item.quantity);
-        });
-        var total = state.cartItems.reduce(function (acc, item) { return acc + item.price * item.quantity; }, 0);
-        var noteInput = document.getElementById('wolko-cart-note-input');
-        var noteVal = noteInput ? noteInput.value.trim() : '';
-        var msg = 'Hi Wolko! 🛍️ I would like to place an order:\n\n' + lines.join('\n') + '\n\n*Total: ' + formatINR(total) + '*' + (noteVal ? '\nGift Note: ' + noteVal : '');
-        var waUrl = 'https://wa.me/' + (config.whatsappPrimary || '918237323043') + '?text=' + encodeURIComponent(msg);
-        window.open(waUrl, '_blank', 'noopener,noreferrer');
         return;
       }
 
@@ -1022,6 +1160,114 @@
         state.craftStepIndex = Math.max(0, Math.min(craftSteps.length - 1, state.craftStepIndex + delta));
         renderCraftStep();
         return;
+      }
+    });
+
+    // 2-Step Checkout Modal Form Submissions
+    document.addEventListener('submit', function (e) {
+      var form = e.target;
+      if (!form || !form.id) return;
+
+      if (form.id === 'wolko-theme-google-form') {
+        e.preventDefault();
+        var gEmailEl = document.getElementById('wolko-g-email');
+        var gNameEl = document.getElementById('wolko-g-name');
+        var emailVal = gEmailEl ? gEmailEl.value.trim() : '';
+        var nameVal = gNameEl ? gNameEl.value.trim() : 'Customer';
+        if (!emailVal) return;
+
+        checkoutState.user = {
+          uid: 'google_' + Date.now(),
+          email: emailVal,
+          displayName: nameVal
+        };
+        try {
+          localStorage.setItem('wolko_google_user', JSON.stringify(checkoutState.user));
+        } catch (err) {}
+        checkoutState.step = 'details-form';
+        renderCheckoutModal();
+        return;
+      }
+
+      if (form.id === 'wolko-theme-order-form') {
+        e.preventDefault();
+        var fName = (document.getElementById('wolko-f-name') || {}).value || '';
+        var fPhone = (document.getElementById('wolko-f-phone') || {}).value || '';
+        var fAddress = (document.getElementById('wolko-f-address') || {}).value || '';
+        var fLandmark = (document.getElementById('wolko-f-landmark') || {}).value || '';
+        var fEmail = (document.getElementById('wolko-f-email') || {}).value || '';
+        var fCity = (document.getElementById('wolko-f-city') || {}).value || '';
+        var fState = (document.getElementById('wolko-f-state') || {}).value || '';
+        var fPincode = (document.getElementById('wolko-f-pincode') || {}).value || '';
+        var payRadio = document.querySelector('input[name="wolko_pay"]:checked');
+        var payMode = payRadio ? payRadio.value : 'COD';
+
+        var orderNum = 'WOLKO-' + Math.floor(10000 + Math.random() * 90000);
+        var subtotal = state.cartItems.reduce(function (acc, item) {
+          return acc + item.price * item.quantity;
+        }, 0);
+        var shipping = subtotal >= 1999 ? 0 : 150;
+        var grandTotal = subtotal + shipping;
+
+        var lines = state.cartItems.map(function (item, idx) {
+          return (idx + 1) + '. *' + item.name + '* (' + item.color + ') × ' + item.quantity + ' = *' + formatINR(item.price * item.quantity) + '*';
+        });
+
+        var msg =
+          '✨ *NEW WOLKO ORDER PLACED* ✨\n' +
+          '🆔 *Order ID:* ' + orderNum + '\n\n' +
+          '👤 *Customer Details:*\n' +
+          '• *Name:* ' + fName + '\n' +
+          '• *Phone / WhatsApp:* ' + fPhone + '\n' +
+          '• *Google Email:* ' + fEmail + '\n\n' +
+          '📍 *Complete Delivery Address:*\n' +
+          '• *Address:* ' + fAddress + (fLandmark ? '\n• *Landmark:* ' + fLandmark : '') + '\n' +
+          '• *City / State:* ' + fCity + ', ' + fState + ' - ' + fPincode + '\n\n' +
+          '🛍️ *Items Ordered:*\n' + lines.join('\n') + '\n\n' +
+          '💰 *Total Amount:* *' + formatINR(grandTotal) + '* (' + payMode + ')';
+
+        checkoutState.orderId = orderNum;
+        checkoutState.whatsappMsg = msg;
+        checkoutState.step = 'confirmed';
+
+        var orderPayload = {
+          orderId: orderNum,
+          userId: (checkoutState.user && checkoutState.user.uid) || '',
+          timestamp: new Date().toLocaleString('en-IN'),
+          customerName: fName,
+          phone: fPhone,
+          email: fEmail,
+          address: fAddress,
+          landmark: fLandmark,
+          city: fCity,
+          state: fState,
+          pincode: fPincode,
+          productsSummary: state.cartItems.map(function (i) { return i.name + ' (' + i.color + ') x' + i.quantity; }).join(' | '),
+          totalAmount: String(grandTotal),
+          paymentMethod: payMode,
+          deliveryAddress: fAddress + ', ' + fCity + ', ' + fState + ' - ' + fPincode,
+          whatsappSentTo: '918591542015',
+          whatsappMessageText: msg,
+          orderStatus: 'CONFIRMED ✅',
+          createdAtMs: Date.now()
+        };
+
+        try {
+          var prevOrders = JSON.parse(localStorage.getItem('wolko_scheduled_orders') || '[]');
+          prevOrders.unshift(orderPayload);
+          localStorage.setItem('wolko_scheduled_orders', JSON.stringify(prevOrders));
+        } catch (err) {}
+
+        fetch('/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(orderPayload)
+        }).catch(function () {});
+
+        state.cartItems = [];
+        saveState();
+        renderCartUI();
+        renderCheckoutModal();
       }
     });
 

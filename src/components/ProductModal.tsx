@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Heart, Plus, Minus, Check, ShieldCheck, Truck, Sparkles, ChevronDown, RotateCcw, Zap } from 'lucide-react';
 import { useShop } from '../context/ShopContext';
 import { ProductColor } from '../data/products';
+import { ProductCommentBox } from './ProductCommentBox';
 
 export const ProductModal: React.FC = () => {
   const { selectedProduct, closeProductModal, addToCart, toggleWishlist, isInWishlist, setIsCartOpen, setIsCheckoutOpen } = useShop();
@@ -428,6 +429,9 @@ export const ProductModal: React.FC = () => {
               </div>
             </div>
           </div>
+
+          {/* Real Public Customer Comments Section Below Product Details */}
+          <ProductCommentBox product={selectedProduct} variant="modal" />
         </div>
       </div>
     </div>

@@ -1,12 +1,30 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { Product, PRODUCTS } from '../data/products';
 import {
   initAuth,
+  signInWithFirebaseGooglePopup,
   backendGoogleSignUp,
   logoutGoogle,
   fetchOrdersFromBackend,
+  getSavedGoogleUser,
+  persistGoogleUserLocally,
+  saveCustomGoogleAvatarUrl,
+  subscribeToUserOrdersInFirestore,
+  mapFirestoreDocToOrderRow,
+  cancelCustomerOrderInBackend,
+  deleteCustomerOrderInBackend,
+  getDeletedOrderIds,
+  getCancelledOrderIds,
+  fetchProductComments,
+  createProductComment,
+  markProductCommentHelpful,
+  removeProductComment,
+  getDeletedCommentIds,
+  mapFirestoreDocToComment,
+  subscribeToPublicCommentsInFirestore,
   SheetOrderRow,
   CustomerGoogleProfile,
+  ProductCommentItem,
 } from '../lib/googleSheets';
 
 export interface CartItem {
@@ -18,6 +36,7 @@ export interface CartItem {
 }
 
 export type GoogleUserProfile = CustomerGoogleProfile;
+export type CustomerDashboardTab = 'orders' | 'profile' | 'addresses';
 
 interface ShopContextType {
   cart: CartItem[];
@@ -53,20 +72,30 @@ interface ShopContextType {
   isCheckoutOpen: boolean;
   setIsCheckoutOpen: (open: boolean) => void;
 
+  // Customer Personal Dashboard State
+  isCustomerDashboardOpen: boolean;
+  setIsCustomerDashboardOpen: (open: boolean) => void;
+  customerDashboardTab: CustomerDashboardTab;
+  setCustomerDashboardTab: (tab: CustomerDashboardTab) => void;
+  openCustomerDashboard: (tab?: CustomerDashboardTab) => void;
+  customerOrders: SheetOrderRow[];
+
   activeCategory: string;
   setActiveCategory: (cat: string) => void;
 
-  // Customer Google Auth State
+  // Customer Google Auth State (Firebase Auth + Persistent Storage)
   googleUser: GoogleUserProfile | null;
   needsGoogleAuth: boolean;
   isSigningInGoogle: boolean;
+  handleGooglePopupSignIn: () => Promise<GoogleUserProfile | null>;
   handleGoogleLogin: (
     email: string,
     displayName?: string
   ) => Promise<GoogleUserProfile | null>;
   handleGoogleLogout: () => Promise<void>;
+  updateGoogleUserPhoto: (photoDataUrlOrUrl: string | null) => void;
 
-  // Backend Orders & AI Voice Agent 5-Minute Call Scheduling (Runs in Background)
+  // Backend Orders
   scheduledOrders: SheetOrderRow[];
   refreshBackendOrders: () => Promise<void>;
   addScheduledOrder: (order: SheetOrderRow) => void;
@@ -76,14 +105,23 @@ interface ShopContextType {
     aiCallStatus: string,
     voiceResponse: string
   ) => void;
-  voiceCallCountdown: number | null;
-  activeVoiceCallOrder: SheetOrderRow | null;
-  triggerImmediateVoiceCall: (order: SheetOrderRow) => void;
-  closeVoiceCallModal: () => void;
+  cancelOrder: (orderId: string) => Promise<void>;
+  deleteOrder: (orderId: string) => Promise<void>;
 
-  // Admin-Only Backend Portal
-  isAdminOpen: boolean;
-  setIsAdminOpen: (open: boolean) => void;
+  // Real Customer Product Comments (Empty until real customers comment)
+  productComments: ProductCommentItem[];
+  getCommentsForProduct: (productId: string) => ProductCommentItem[];
+  addProductComment: (input: {
+    productId: string;
+    productName: string;
+    productImage?: string;
+    authorName: string;
+    rating: number;
+    highlights?: string[];
+    commentText: string;
+  }) => Promise<ProductCommentItem>;
+  markCommentHelpful: (commentId: string) => Promise<void>;
+  deleteProductComment: (commentId: string) => Promise<void>;
 }
 
 const ShopContext = createContext<ShopContextType | undefined>(undefined);
@@ -127,35 +165,26 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isWishlistOpen, setIsWishlistOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [isCustomerDashboardOpen, setIsCustomerDashboardOpen] = useState(false);
+  const [customerDashboardTab, setCustomerDashboardTab] =
+    useState<CustomerDashboardTab>('orders');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [modalInitialColor, setModalInitialColor] = useState<
     string | undefined
   >(undefined);
   const [activeCategory, setActiveCategory] = useState<string>('all');
 
-  // Customer Google Session (persisted locally for convenience)
-  const [googleUser, setGoogleUser] = useState<GoogleUserProfile | null>(() => {
-    try {
-      const saved = localStorage.getItem('wolko_google_customer');
-      return saved ? JSON.parse(saved) : null;
-    } catch {
-      return null;
-    }
-  });
+  // Customer Google Session (Firebase Auth + unified localStorage persistence)
+  const [googleUser, setGoogleUser] = useState<GoogleUserProfile | null>(() =>
+    getSavedGoogleUser()
+  );
   const [needsGoogleAuth, setNeedsGoogleAuth] = useState<boolean>(
-    () => !googleUser
+    () => !getSavedGoogleUser()
   );
   const [isSigningInGoogle, setIsSigningInGoogle] = useState<boolean>(false);
 
   const [scheduledOrders, setScheduledOrders] = useState<SheetOrderRow[]>([]);
-  const [voiceCallCountdown, setVoiceCallCountdown] = useState<number | null>(
-    null
-  );
-  const [pendingCallOrder, setPendingCallOrder] =
-    useState<SheetOrderRow | null>(null);
-  const [activeVoiceCallOrder, setActiveVoiceCallOrder] =
-    useState<SheetOrderRow | null>(null);
-  const [isAdminOpen, setIsAdminOpen] = useState<boolean>(false);
+  const [productComments, setProductComments] = useState<ProductCommentItem[]>([]);
 
   const refreshBackendOrders = async () => {
     try {
@@ -166,39 +195,161 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const refreshProductComments = async () => {
+    try {
+      const list = await fetchProductComments();
+      setProductComments(list);
+    } catch {
+      // ignore if offline
+    }
+  };
+
   useEffect(() => {
     refreshBackendOrders();
-  }, []);
+    refreshProductComments();
 
-  useEffect(() => {
-    const unsubscribe = initAuth((user) => {
-      setGoogleUser(user);
-      setNeedsGoogleAuth(false);
-      try {
-        localStorage.setItem('wolko_google_customer', JSON.stringify(user));
-      } catch {
-        // ignore
-      }
+    const unsubPublicComments = subscribeToPublicCommentsInFirestore((rawDocs) => {
+      const deletedSet = getDeletedCommentIds();
+      const liveComments = rawDocs
+        .map(mapFirestoreDocToComment)
+        .filter((c) => c.commentId && !deletedSet.has(c.commentId));
+
+      setProductComments((prev) => {
+        const mergedMap = new Map<string, ProductCommentItem>();
+        for (const c of [...liveComments, ...prev]) {
+          if (c.commentId && !deletedSet.has(c.commentId) && !mergedMap.has(c.commentId)) {
+            mergedMap.set(c.commentId, c);
+          }
+        }
+        return Array.from(mergedMap.values()).sort(
+          (a, b) => (b.createdAtMs || 0) - (a.createdAtMs || 0)
+        );
+      });
     });
-    return () => unsubscribe();
+
+    return () => {
+      unsubPublicComments();
+    };
   }, []);
 
-  // Background 5-Minute (300s) Countdown Timer for AI Voice Agent Callback
   useEffect(() => {
-    if (voiceCallCountdown === null || !pendingCallOrder) return;
+    let unsubFirestoreOrders: (() => void) | null = null;
 
-    if (voiceCallCountdown <= 0) {
-      setActiveVoiceCallOrder(pendingCallOrder);
-      setVoiceCallCountdown(null);
-      return;
+    const unsubscribeAuth = initAuth(
+      (user) => {
+        setGoogleUser(user);
+        setNeedsGoogleAuth(false);
+        persistGoogleUserLocally(user);
+        refreshBackendOrders();
+
+        if (unsubFirestoreOrders) {
+          unsubFirestoreOrders();
+        }
+        unsubFirestoreOrders = subscribeToUserOrdersInFirestore((rawDocs) => {
+          const deletedSet = getDeletedOrderIds();
+          const cancelledSet = getCancelledOrderIds();
+          const liveRows = rawDocs
+            .map(mapFirestoreDocToOrderRow)
+            .filter((o) => o.orderId && !deletedSet.has(o.orderId))
+            .map((o) =>
+              cancelledSet.has(o.orderId)
+                ? {
+                    ...o,
+                    orderStatus: 'CANCELLED ❌',
+                    aiCallStatus: 'CANCELLED BY CUSTOMER',
+                  }
+                : o
+            );
+          setScheduledOrders((prev) => {
+            const mergedMap = new Map<string, SheetOrderRow>();
+            for (const o of [...liveRows, ...prev]) {
+              if (
+                o.orderId &&
+                !deletedSet.has(o.orderId) &&
+                !mergedMap.has(o.orderId)
+              ) {
+                mergedMap.set(
+                  o.orderId,
+                  cancelledSet.has(o.orderId)
+                    ? {
+                        ...o,
+                        orderStatus: 'CANCELLED ❌',
+                        aiCallStatus: 'CANCELLED BY CUSTOMER',
+                      }
+                    : o
+                );
+              }
+            }
+            return Array.from(mergedMap.values());
+          });
+        });
+      },
+      () => {
+        // Only mark unauthenticated if no saved user exists in localStorage
+        const existingSaved = getSavedGoogleUser();
+        if (existingSaved) {
+          setGoogleUser(existingSaved);
+          setNeedsGoogleAuth(false);
+        } else {
+          setGoogleUser(null);
+          setNeedsGoogleAuth(true);
+        }
+      }
+    );
+
+    return () => {
+      unsubscribeAuth();
+      if (unsubFirestoreOrders) {
+        unsubFirestoreOrders();
+      }
+    };
+  }, []);
+
+  // Filter orders belonging to the current customer (or placed in this browser session)
+  const customerOrders = useMemo(() => {
+    const deletedSet = getDeletedOrderIds();
+    const activeList = scheduledOrders.filter(
+      (o) => o && o.orderId && !deletedSet.has(o.orderId)
+    );
+    if (!googleUser) {
+      return activeList;
     }
+    const emailLower = (googleUser.email || '').trim().toLowerCase();
+    const uid = googleUser.uid;
+    const matched = activeList.filter((o) => {
+      if (uid && o.userId && o.userId === uid) return true;
+      if (
+        emailLower &&
+        o.email &&
+        o.email.trim().toLowerCase() === emailLower
+      ) {
+        return true;
+      }
+      return false;
+    });
+    return matched.length > 0 ? matched : activeList;
+  }, [scheduledOrders, googleUser]);
 
-    const timer = setInterval(() => {
-      setVoiceCallCountdown((prev) => (prev !== null ? prev - 1 : null));
-    }, 1000);
+  const openCustomerDashboard = (tab: CustomerDashboardTab = 'orders') => {
+    setCustomerDashboardTab(tab);
+    setIsCustomerDashboardOpen(true);
+    refreshBackendOrders();
+  };
 
-    return () => clearInterval(timer);
-  }, [voiceCallCountdown, pendingCallOrder]);
+  const handleGooglePopupSignIn =
+    async (): Promise<GoogleUserProfile | null> => {
+      setIsSigningInGoogle(true);
+      try {
+        const profile = await signInWithFirebaseGooglePopup();
+        setGoogleUser(profile);
+        setNeedsGoogleAuth(false);
+        persistGoogleUserLocally(profile);
+        refreshBackendOrders();
+        return profile;
+      } finally {
+        setIsSigningInGoogle(false);
+      }
+    };
 
   const handleGoogleLogin = async (
     email: string,
@@ -209,11 +360,8 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({
       const profile = await backendGoogleSignUp(email, displayName);
       setGoogleUser(profile);
       setNeedsGoogleAuth(false);
-      try {
-        localStorage.setItem('wolko_google_customer', JSON.stringify(profile));
-      } catch {
-        // ignore
-      }
+      persistGoogleUserLocally(profile);
+      refreshBackendOrders();
       return profile;
     } finally {
       setIsSigningInGoogle(false);
@@ -224,18 +372,22 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({
     await logoutGoogle();
     setGoogleUser(null);
     setNeedsGoogleAuth(true);
-    try {
-      localStorage.removeItem('wolko_google_customer');
-    } catch {
-      // ignore
+    setIsCustomerDashboardOpen(false);
+  };
+
+  const updateGoogleUserPhoto = (photoDataUrlOrUrl: string | null) => {
+    saveCustomGoogleAvatarUrl(photoDataUrlOrUrl);
+    const updated = getSavedGoogleUser();
+    if (updated) {
+      setGoogleUser({ ...updated });
     }
   };
 
   const addScheduledOrder = (order: SheetOrderRow) => {
-    setScheduledOrders((prev) => [order, ...prev]);
-    setPendingCallOrder(order);
-    // Automatically schedule the 5-minute (300 seconds) AI Voice Agent call in the background
-    setVoiceCallCountdown(300);
+    setScheduledOrders((prev) => [
+      order,
+      ...prev.filter((o) => o.orderId !== order.orderId),
+    ]);
   };
 
   const updateLocalOrderStatus = (
@@ -251,25 +403,77 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({
           : o
       )
     );
-    if (pendingCallOrder?.orderId === orderId) {
-      setPendingCallOrder((prev) =>
-        prev ? { ...prev, orderStatus, aiCallStatus, voiceResponse } : null
-      );
-    }
-    if (activeVoiceCallOrder?.orderId === orderId) {
-      setActiveVoiceCallOrder((prev) =>
-        prev ? { ...prev, orderStatus, aiCallStatus, voiceResponse } : null
-      );
-    }
   };
 
-  const triggerImmediateVoiceCall = (order: SheetOrderRow) => {
-    setVoiceCallCountdown(null);
-    setActiveVoiceCallOrder(order);
+  const cancelOrder = async (orderId: string) => {
+    const orderSnap = scheduledOrders.find((o) => o.orderId === orderId);
+    setScheduledOrders((prev) =>
+      prev.map((o) =>
+        o.orderId === orderId
+          ? {
+              ...o,
+              orderStatus: 'CANCELLED ❌',
+              aiCallStatus: 'CANCELLED BY CUSTOMER',
+              voiceResponse: 'Order cancelled by customer from dashboard',
+            }
+          : o
+      )
+    );
+    await cancelCustomerOrderInBackend(orderId, orderSnap);
   };
 
-  const closeVoiceCallModal = () => {
-    setActiveVoiceCallOrder(null);
+  const deleteOrder = async (orderId: string) => {
+    setScheduledOrders((prev) => prev.filter((o) => o.orderId !== orderId));
+    await deleteCustomerOrderInBackend(orderId);
+  };
+
+  const getCommentsForProduct = (productId: string): ProductCommentItem[] => {
+    const deletedSet = getDeletedCommentIds();
+    return productComments.filter(
+      (c) =>
+        c &&
+        c.productId === productId &&
+        !deletedSet.has(c.commentId)
+    );
+  };
+
+  const addProductComment = async (input: {
+    productId: string;
+    productName: string;
+    productImage?: string;
+    authorName: string;
+    rating: number;
+    highlights?: string[];
+    commentText: string;
+  }): Promise<ProductCommentItem> => {
+    const created = await createProductComment({
+      ...input,
+      userId: googleUser?.uid,
+      authorEmail: googleUser?.email || undefined,
+      authorPhotoURL: googleUser?.photoURL || null,
+      isVerifiedBuyer: customerOrders.length > 0 || Boolean(googleUser?.email),
+    });
+    setProductComments((prev) => [
+      created,
+      ...prev.filter((c) => c.commentId !== created.commentId),
+    ]);
+    return created;
+  };
+
+  const markCommentHelpful = async (commentId: string) => {
+    setProductComments((prev) =>
+      prev.map((c) =>
+        c.commentId === commentId
+          ? { ...c, helpfulCount: (c.helpfulCount || 0) + 1 }
+          : c
+      )
+    );
+    await markProductCommentHelpful(commentId);
+  };
+
+  const deleteProductComment = async (commentId: string) => {
+    setProductComments((prev) => prev.filter((c) => c.commentId !== commentId));
+    await removeProductComment(commentId);
   };
 
   useEffect(() => {
@@ -409,23 +613,32 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({
         setIsSearchOpen,
         isCheckoutOpen,
         setIsCheckoutOpen,
+        isCustomerDashboardOpen,
+        setIsCustomerDashboardOpen,
+        customerDashboardTab,
+        setCustomerDashboardTab,
+        openCustomerDashboard,
+        customerOrders,
         activeCategory,
         setActiveCategory,
         googleUser,
         needsGoogleAuth,
         isSigningInGoogle,
+        handleGooglePopupSignIn,
         handleGoogleLogin,
         handleGoogleLogout,
+        updateGoogleUserPhoto,
         scheduledOrders,
         refreshBackendOrders,
         addScheduledOrder,
         updateLocalOrderStatus,
-        voiceCallCountdown,
-        activeVoiceCallOrder,
-        triggerImmediateVoiceCall,
-        closeVoiceCallModal,
-        isAdminOpen,
-        setIsAdminOpen,
+        cancelOrder,
+        deleteOrder,
+        productComments,
+        getCommentsForProduct,
+        addProductComment,
+        markCommentHelpful,
+        deleteProductComment,
       }}
     >
       {children}

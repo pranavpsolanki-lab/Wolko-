@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Sparkles, ShoppingBag, Eye, Heart, MessageCircle, Flame, Tag, Check, ArrowRight } from 'lucide-react';
 import { PRODUCTS, Product } from '../data/products';
 import { useShop } from '../context/ShopContext';
+import { ProductCommentBox } from './ProductCommentBox';
 
 export const DiwaliSaleSection: React.FC = () => {
   const { openProductModal, addToCart, toggleWishlist, wishlist, setIsCartOpen, setIsCheckoutOpen } = useShop();
@@ -33,14 +34,6 @@ export const DiwaliSaleSection: React.FC = () => {
     setTimeout(() => {
       setAddedItemNotice(null);
     }, 2200);
-  };
-
-  const openWhatsAppInquiry = (product: Product, e: React.MouseEvent) => {
-    e.stopPropagation();
-    const chosenColor = selectedVariants[product.id] || (product.colors?.[0]?.name ?? 'Standard');
-    const msg = `Hi Wolko! 🪔 I want to order the Diwali Special: *${product.name}* (Variant: ${chosenColor}) priced at ₹${product.price}. Please share availability and dispatch details!`;
-    const url = `https://wa.me/918237323043?text=${encodeURIComponent(msg)}`;
-    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -291,6 +284,9 @@ export const DiwaliSaleSection: React.FC = () => {
                       </button>
                     </div>
                   </div>
+
+                  {/* Real Customer Comment Box Below Every Product */}
+                  <ProductCommentBox product={product} variant="card" />
                 </div>
               </div>
             );
@@ -310,27 +306,19 @@ export const DiwaliSaleSection: React.FC = () => {
               Need personalized gift hampers or custom color themes?
             </h3>
             <p className="text-xs sm:text-sm text-[#D9CFC4] font-light mt-1 max-w-xl">
-              Connect directly with our master artisan on WhatsApp (+91 82373 23043 & +91 8591542015). We craft personalized letterpress gift notes and bulk wedding/Diwali favor sets.
+              Connect directly with our master artisan on WhatsApp (+91 85915 42015). We craft personalized letterpress gift notes and bulk wedding/Diwali favor sets.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
             <a
-              href="https://wa.me/918237323043?text=Hi%20Wolko!%20I%20am%20interested%20in%20Diwali%20custom%20gift%20hampers%20and%20bulk%20orders."
+              href="https://wa.me/918591542015?text=Hi%20Wolko!%20I%20am%20interested%20in%20Diwali%20custom%20gift%20hampers%20and%20bulk%20orders."
               target="_blank"
               rel="noopener noreferrer"
               className="py-3 px-6 rounded-full bg-[#25D366] hover:bg-[#20BA5A] text-white text-xs font-semibold tracking-wider uppercase flex items-center gap-2 shadow-lg transition-transform active:scale-95"
             >
               <MessageCircle className="w-4 h-4 fill-white" />
-              <span>Chat on WhatsApp (82373 23043)</span>
-            </a>
-            <a
-              href="https://wa.me/918591542015?text=Hi%20Wolko!%20Inquiring%20about%20Diwali%20order%20support."
-              target="_blank"
-              rel="noopener noreferrer"
-              className="py-3 px-5 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-medium flex items-center gap-1.5 transition-colors"
-            >
-              <span>Backup Support (8591542015)</span>
+              <span>Chat on WhatsApp (85915 42015)</span>
             </a>
           </div>
         </div>
