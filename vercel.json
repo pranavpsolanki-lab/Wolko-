@@ -1,0 +1,32 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/auth/google-signup",
+      "destination": "/api/orders?action=google-signup"
+    },
+    {
+      "source": "/api/triggers/firebase-order",
+      "destination": "/api/orders?action=firebase-trigger"
+    },
+    {
+      "source": "/api/orders/:orderId/confirm",
+      "destination": "/api/orders?orderId=:orderId&action=confirm"
+    },
+    {
+      "source": "/api/orders/:orderId",
+      "destination": "/api/orders?orderId=:orderId"
+    },
+    {
+      "source": "/api/comments/:commentId/helpful",
+      "destination": "/api/comments?commentId=:commentId&action=helpful"
+    },
+    {
+      "source": "/api/comments/:commentId",
+      "destination": "/api/comments?commentId=:commentId"
+    },
+    {
+      "source": "/((?!api/|assets/|.*\\..*).*)",
+      "destination": "/index.html"
+    }
+  ]
+}

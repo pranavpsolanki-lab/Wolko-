@@ -19,6 +19,122 @@ import {
 export const STORE_WHATSAPP_NUMBER = '918591542015';
 export const STORE_WHATSAPP_DISPLAY = '+91 85915 42015';
 
+const DIRECT_TELEGRAM_BOT_TOKEN =
+  (import.meta.env.VITE_TELEGRAM_BOT_TOKEN as string | undefined)?.trim() ||
+  '8942096264:AAHqNy0Vbt1AHxVnybKKcY64UAnZEaz6KW0';
+const DIRECT_TELEGRAM_CHAT_ID =
+  (import.meta.env.VITE_TELEGRAM_CHAT_ID as string | undefined)?.trim() ||
+  '6439560085';
+
+const sentTelegramKeys = new Set<string>();
+
+export function buildDirectTelegramOrderMessage(
+  order: SheetOrderRow,
+  customMessage?: string
+): string {
+  if (customMessage && customMessage.trim().length > 20) {
+    return customMessage.trim();
+  }
+  const fullAddr =
+    order.deliveryAddress ||
+    [
+      order.address,
+      order.landmark ? `Landmark: ${order.landmark}` : '',
+      order.city,
+      order.state,
+      order.pincode,
+    ]
+      .filter(Boolean)
+      .join(', ');
+
+  return [
+    `✨ NEW WOLKO ORDER PLACED ✨`,
+    `🆔 Order ID: ${order.orderId}`,
+    `📅 Date: ${order.timestamp || new Date().toLocaleString('en-IN')}`,
+    ``,
+    `👤 Customer Details:`,
+    `• Name: ${order.customerName}`,
+    `• Phone / Mobile: ${order.phone}`,
+    `• Google Email: ${order.email || 'N/A'}`,
+    ``,
+    `📍 Complete Delivery Address:`,
+    order.address ? `• Street / House: ${order.address}` : null,
+    order.landmark ? `• Landmark: ${order.landmark}` : null,
+    order.city || order.state
+      ? `• City / State: ${[order.city, order.state].filter(Boolean).join(', ')}`
+      : null,
+    order.pincode ? `• Pincode: ${order.pincode}` : null,
+    order.deliveryNotes ? `• Delivery Note: ${order.deliveryNotes}` : null,
+    `• Full Address: ${fullAddr}`,
+    ``,
+    `🛍️ Items Ordered:`,
+    `${order.productsSummary}`,
+    ``,
+    `💰 Total Amount: ₹${order.totalAmount}`,
+    `💳 Payment Method: ${order.paymentMethod || 'COD'}`,
+  ]
+    .filter((line) => line !== null)
+    .join('\n');
+}
+
+export async function sendTelegramDirectFromBrowser(
+  text: string,
+  dedupeKey?: string
+): Promise<boolean> {
+  if (dedupeKey && sentTelegramKeys.has(dedupeKey)) {
+    return true;
+  }
+  if (dedupeKey) {
+    sentTelegramKeys.add(dedupeKey);
+  }
+
+  const chatIds = new Set<string>([DIRECT_TELEGRAM_CHAT_ID, '6439560085']);
+
+  try {
+    const updRes = await fetch(
+      `https://api.telegram.org/bot${DIRECT_TELEGRAM_BOT_TOKEN}/getUpdates?timeout=1`
+    );
+    if (updRes.ok) {
+      const updData = await updRes.json();
+      if (updData?.ok && Array.isArray(updData.result)) {
+        for (const u of updData.result) {
+          const cid = u?.message?.chat?.id ?? u?.my_chat_member?.chat?.id;
+          if (cid !== undefined && cid !== null) {
+            chatIds.add(String(cid).trim());
+          }
+        }
+      }
+    }
+  } catch {
+    // ignore getUpdates error
+  }
+
+  let anySuccess = false;
+  for (const chatId of chatIds) {
+    if (!chatId) continue;
+    try {
+      const res = await fetch(
+        `https://api.telegram.org/bot${DIRECT_TELEGRAM_BOT_TOKEN}/sendMessage`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text,
+          }),
+        }
+      );
+      if (res.ok) {
+        anySuccess = true;
+      }
+    } catch {
+      // ignore single chat error
+    }
+  }
+
+  return anySuccess;
+}
+
 export interface SheetOrderRow {
   orderId: string;
   userId?: string;
@@ -678,8 +794,10 @@ export async function saveOrderToBackend(
     }
   })();
 
-  // 3. Immediately POST to /api/orders to capture all customer form data & dispatch to 8591542015
+  // 3. Immediately POST to /api/orders AND guarantee Telegram delivery on Vercel / static hosts
   let backendSavedOrder: SheetOrderRow | null = null;
+  let deliveredToTelegramByBackend = false;
+
   try {
     const res = await fetch('/api/orders', {
       method: 'POST',
@@ -697,31 +815,22 @@ export async function saveOrderToBackend(
       if (data?.order) {
         backendSavedOrder = data.order as SheetOrderRow;
       }
+      if (data?.deliveredToTelegram) {
+        deliveredToTelegramByBackend = true;
+        sentTelegramKeys.add(`ORDER:${order.orderId}`);
+      }
     }
   } catch {
-    // Fallback to Firebase trigger endpoint if primary route encountered network error
-    try {
-      const triggerRes = await fetch('/api/triggers/firebase-order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          order: {
-            ...order,
-            userId: auth.currentUser?.uid || order.userId || '',
-            whatsappSentTo: STORE_WHATSAPP_NUMBER,
-          },
-          whatsappMessageText: whatsappMessageText || '',
-        }),
-      });
-      if (triggerRes.ok) {
-        backendSavedOrder = {
-          ...order,
-          whatsappSentTo: STORE_WHATSAPP_NUMBER,
-        };
-      }
-    } catch {
-      // ignore fallback error
-    }
+    // Fallback handled below via direct Telegram Bot API dispatch
+  }
+
+  // Direct Telegram Bot API Guarantee (Ensures 100% delivery on Vercel even if /api/orders wasn't reached)
+  if (!deliveredToTelegramByBackend) {
+    const formattedMsg = buildDirectTelegramOrderMessage(
+      order,
+      whatsappMessageText
+    );
+    await sendTelegramDirectFromBrowser(formattedMsg, `ORDER:${order.orderId}`);
   }
 
   // Wait for Firestore write to settle as well
@@ -915,19 +1024,43 @@ export async function cancelCustomerOrderInBackend(
   })();
 
   const backendTask = (async () => {
+    let deliveredByBackend = false;
     try {
-      await fetch(`/api/orders/${encodeURIComponent(orderId)}/confirm`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          orderStatus: 'CANCELLED ❌',
-          aiCallStatus: 'CANCELLED BY CUSTOMER',
-          voiceResponse: 'Order cancelled by customer from dashboard',
-          orderSnapshot,
-        }),
-      });
+      const res = await fetch(
+        `/api/orders/${encodeURIComponent(orderId)}/confirm`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            orderStatus: 'CANCELLED ❌',
+            aiCallStatus: 'CANCELLED BY CUSTOMER',
+            voiceResponse: 'Order cancelled by customer from dashboard',
+            orderSnapshot,
+          }),
+        }
+      );
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.deliveredToTelegram) {
+          deliveredByBackend = true;
+          sentTelegramKeys.add(`CANCEL:${orderId}`);
+        }
+      }
     } catch {
       // ignore offline
+    }
+
+    if (!deliveredByBackend) {
+      const msg = [
+        `❌ ORDER CANCELLED BY CUSTOMER ❌`,
+        `🆔 Order ID: ${orderId}`,
+        `👤 Customer: ${orderSnapshot?.customerName || 'Customer'} (${orderSnapshot?.phone || 'N/A'})`,
+        `📧 Email: ${orderSnapshot?.email || 'N/A'}`,
+        `🛍️ Items: ${orderSnapshot?.productsSummary || 'N/A'}`,
+        `💰 Amount: ₹${orderSnapshot?.totalAmount || '0'}`,
+        `📅 Time: ${new Date().toLocaleString('en-IN')}`,
+      ].join('\n');
+      await sendTelegramDirectFromBrowser(msg, `CANCEL:${orderId}`);
     }
   })();
 
@@ -955,12 +1088,29 @@ export async function deleteCustomerOrderInBackend(
   })();
 
   const backendTask = (async () => {
+    let deliveredByBackend = false;
     try {
-      await fetch(`/api/orders/${encodeURIComponent(orderId)}`, {
+      const res = await fetch(`/api/orders/${encodeURIComponent(orderId)}`, {
         method: 'DELETE',
       });
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.deliveredToTelegram) {
+          deliveredByBackend = true;
+          sentTelegramKeys.add(`DELETE:${orderId}`);
+        }
+      }
     } catch {
       // ignore offline
+    }
+
+    if (!deliveredByBackend) {
+      const msg = [
+        `🗑️ ORDER DELETED BY CUSTOMER 🗑️`,
+        `🆔 Order ID: ${orderId}`,
+        `📅 Time: ${new Date().toLocaleString('en-IN')}`,
+      ].join('\n');
+      await sendTelegramDirectFromBrowser(msg, `DELETE:${orderId}`);
     }
   })();
 

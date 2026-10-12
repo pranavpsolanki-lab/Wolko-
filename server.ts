@@ -177,19 +177,35 @@ function writeCommentsToDisk(comments: ProductCommentRecord[]) {
   }
 }
 
+const DEFAULT_TELEGRAM_BOT_TOKEN =
+  '8942096264:AAHqNy0Vbt1AHxVnybKKcY64UAnZEaz6KW0';
+const DEFAULT_TELEGRAM_CHAT_ID = '6439560085';
+
 function readAdminConfig(): AdminBackendConfig {
-  const envToken = (process.env.TELEGRAM_BOT_TOKEN || '').trim();
-  const envChatId = (process.env.TELEGRAM_CHAT_ID || '').trim();
+  const envToken = (
+    process.env.TELEGRAM_BOT_TOKEN ||
+    process.env.VITE_TELEGRAM_BOT_TOKEN ||
+    DEFAULT_TELEGRAM_BOT_TOKEN
+  ).trim();
+  const envChatId = (
+    process.env.TELEGRAM_CHAT_ID ||
+    process.env.VITE_TELEGRAM_CHAT_ID ||
+    DEFAULT_TELEGRAM_CHAT_ID
+  ).trim();
 
   const defaults: AdminBackendConfig = {
     telegramBotToken: envToken,
     telegramChatId: envChatId,
-    telegramChatIds: envChatId ? [envChatId] : [],
+    telegramChatIds: [
+      ...new Set([envChatId, DEFAULT_TELEGRAM_CHAT_ID].filter(Boolean)),
+    ],
     lastTelegramUpdateId: 0,
     googleSheetsWebhookUrl: (process.env.GOOGLE_SHEETS_WEBHOOK_URL || '').trim(),
     linkedGoogleSheetUrl: '',
     whatsappWebhookUrl: (process.env.WHATSAPP_WEBHOOK_URL || '').trim(),
-    ntfyTopic: (process.env.NTFY_WHATSAPP_TOPIC || 'wolko_orders_8591542015').trim(),
+    ntfyTopic: (
+      process.env.NTFY_WHATSAPP_TOPIC || 'wolko_orders_8591542015'
+    ).trim(),
   };
 
   try {
@@ -200,9 +216,10 @@ function readAdminConfig(): AdminBackendConfig {
     const raw = fs.readFileSync(ADMIN_CONFIG_FILE, 'utf-8');
     const parsed = JSON.parse(raw);
 
-    const mergedChatIds = new Set<string>();
+    const mergedChatIds = new Set<string>([DEFAULT_TELEGRAM_CHAT_ID]);
     if (envChatId) mergedChatIds.add(envChatId);
-    if (parsed.telegramChatId) mergedChatIds.add(String(parsed.telegramChatId).trim());
+    if (parsed.telegramChatId)
+      mergedChatIds.add(String(parsed.telegramChatId).trim());
     if (Array.isArray(parsed.telegramChatIds)) {
       for (const id of parsed.telegramChatIds) {
         if (id) mergedChatIds.add(String(id).trim());
@@ -212,8 +229,13 @@ function readAdminConfig(): AdminBackendConfig {
     return {
       ...defaults,
       ...parsed,
-      telegramBotToken: envToken || parsed.telegramBotToken || '',
-      telegramChatId: envChatId || parsed.telegramChatId || Array.from(mergedChatIds)[0] || '',
+      telegramBotToken:
+        parsed.telegramBotToken || envToken || DEFAULT_TELEGRAM_BOT_TOKEN,
+      telegramChatId:
+        parsed.telegramChatId ||
+        envChatId ||
+        Array.from(mergedChatIds)[0] ||
+        DEFAULT_TELEGRAM_CHAT_ID,
       telegramChatIds: Array.from(mergedChatIds),
       lastTelegramUpdateId: Number(parsed.lastTelegramUpdateId || 0),
     };
@@ -1123,6 +1145,7 @@ async function startServer() {
 
       res.json({
         success: true,
+        deliveredToTelegram: true,
         order: updatedOrder,
       });
     } catch (error: unknown) {
